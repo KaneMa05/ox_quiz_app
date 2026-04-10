@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>공시생 OX 퀴즈</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="top">
+        <h1>OX 퀴즈</h1>
+      </header>
+
+      <section class="card" id="pickCard">
+        <label class="label" for="subjectSelect">과목</label>
+        <select id="subjectSelect" class="select"></select>
+        <label class="label" for="unitSelect">단원</label>
+        <select id="unitSelect" class="select"></select>
+        <button id="startBtn" class="btn btn-start" type="button">시작</button>
+      </section>
+
+      <section class="card hidden" id="quizCard">
+        <div class="meta">
+          <span id="progress">1 / 1</span>
+          <span id="score">점수 0</span>
+        </div>
+        <div class="question" id="question"></div>
+        <div class="hint" id="hint"></div>
+        <div class="actions">
+          <button id="btnO" class="btn btn-o" type="button">O</button>
+          <button id="btnX" class="btn btn-x" type="button">X</button>
+        </div>
+      </section>
+
+      <section class="card hidden" id="resultCard">
+        <p id="finalScore" class="result"></p>
+        <button id="retryBtn" class="btn btn-retry" type="button">다시 풀기</button>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="./data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
