@@ -76,6 +76,27 @@ body {
   font-weight: 700;
 }
 
+.qaBox {
+  margin-top: 10px;
+  border: 1px solid #2a3a52;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: color-mix(in oklab, #0b1220, var(--card) 30%);
+}
+
+.qaLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.choice {
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
 .hint {
   min-height: 24px;
   margin-bottom: 12px;
@@ -113,6 +134,16 @@ body {
   background: var(--accent);
   width: 100%;
   margin-top: 10px;
+}
+
+.btn-confirm {
+  width: 100%;
+  margin-top: 10px;
+  background: #334155;
+}
+
+.btn-confirm:disabled {
+  opacity: 0.55;
 }
 
 .result {

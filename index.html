@@ -25,12 +25,20 @@
           <span id="progress">1 / 1</span>
           <span id="score">점수 0</span>
         </div>
-        <div class="question" id="question"></div>
+        <div class="qaBox">
+          <div class="qaLabel">문제</div>
+          <div class="question" id="question"></div>
+        </div>
+        <div class="qaBox">
+          <div class="qaLabel">선지</div>
+          <div class="choice" id="choiceText"></div>
+        </div>
         <div class="hint" id="hint"></div>
         <div class="actions">
           <button id="btnO" class="btn btn-o" type="button">O</button>
           <button id="btnX" class="btn btn-x" type="button">X</button>
         </div>
+        <button id="confirmBtn" class="btn btn-confirm" type="button" disabled>확인</button>
       </section>
 
       <section class="card hidden" id="resultCard">
