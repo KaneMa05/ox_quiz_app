@@ -194,6 +194,10 @@ function supabaseUrlFromEnv(env) {
   return "";
 }
 
+function eqUuid(a, b) {
+  return a != null && b != null && String(a).toLowerCase() === String(b).toLowerCase();
+}
+
 function mapQuestionRowFromDb(q) {
   return {
     packNo: q.pack_no != null ? Number(q.pack_no) : null,
@@ -228,7 +232,7 @@ function buildCurriculumFromRows(subjects, units, questions) {
           .map((u) => ({
             id: u.id,
             name: u.name,
-            questions: qs.filter((qq) => qq.unit_id === u.id).map(mapQuestionRowFromDb),
+            questions: qs.filter((qq) => eqUuid(qq.unit_id, u.id)).map(mapQuestionRowFromDb),
           })),
       };
     }
@@ -255,7 +259,10 @@ function buildCurriculumFromRows(subjects, units, questions) {
           .map((mi) => ({
             id: mi.id,
             name: mi.name,
-            questions: qs.filter((qq) => qq.unit_id === mi.id).map(mapQuestionRowFromDb),
+            // 소단원 id + 그 부모 대단원 id(실수로 대단원에만 넣은 문항도 소단원에서 출제되게)
+            questions: qs
+              .filter((qq) => eqUuid(qq.unit_id, mi.id) || eqUuid(qq.unit_id, ma.id))
+              .map(mapQuestionRowFromDb),
           })),
       })),
     };
@@ -294,7 +301,9 @@ async function loadCurriculumFromSupabase(env) {
     client
       .from("quiz_questions")
       .select("id,unit_id,question,choice_text,body,answer,explanation,sort_order,pack_no")
-      .order("sort_order"),
+      .order("sort_order")
+      // PostgREST 기본 max-rows(예: 1000) 넘으면 뒤쪽 문항이 잘려 단원에 문제가 없는 것처럼 보일 수 있음
+      .limit(20000),
   ]);
 
   if (subRes.error) throw subRes.error;
@@ -620,9 +629,28 @@ function start() {
       (q.packNo == null || !excluded.has(Number(q.packNo))) && !isMastered(uid, q)
   );
   if (!list.length) {
-    window.alert(
-      "이 단원은 2회 이상 맞춘 문항·출제 제외 번호를 반영하면 남은 문제가 없습니다."
-    );
+    if (!unit) {
+      window.alert(
+        "선택한 단원 정보를 찾지 못했습니다. 새로고침 후 과목·대단원·소단원을 다시 고르고 시작해 보세요."
+      );
+    } else if (!all.length) {
+      window.alert(
+        "이 소단원에 붙은 문항이 앱 쪽에서는 0개입니다.\n" +
+          "· Supabase Table Editor에 quiz_questions 행이 있는지\n" +
+          "· 배포 사이트(Vercel)의 환경 변수가 지금 확인 중인 DB와 같은 프로젝트인지\n" +
+          "· 최신 앱(문항 한도 확대·대단원 UUID 문항 포함 패치)이 배포됐는지\n" +
+          "를 확인해 보세요."
+      );
+    } else {
+      const nPack = all.filter((q) => q.packNo != null && excluded.has(Number(q.packNo))).length;
+      const nMaster = all.filter((q) => isMastered(uid, q)).length;
+      window.alert(
+        `이 단원 문항은 DB에서 ${all.length}개 불러왔지만, 출제 가능한 문항이 0개입니다.\n` +
+          `· 출제 제외 pack 번호에 해당: ${nPack}개 (quiz_settings.excluded_pack_nos)\n` +
+          `· 이미 2회 이상 맞춰 제외: ${nMaster}개\n` +
+          `하단 「맞춤 기록 초기화」로 맞춤 기록을 지우거나, 제외 pack 설정을 확인해 보세요.`
+      );
+    }
     return;
   }
   const take = Math.min(SESSION_QUESTION_COUNT, list.length);
