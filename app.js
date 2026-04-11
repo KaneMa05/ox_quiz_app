@@ -13,12 +13,15 @@ const ui = {
   btnO: document.getElementById("btnO"),
   btnX: document.getElementById("btnX"),
   confirmBtn: document.getElementById("confirmBtn"),
+  homeBtn: document.getElementById("homeBtn"),
   finalScore: document.getElementById("finalScore"),
   retryBtn: document.getElementById("retryBtn"),
 };
 
 let curriculum = [];
 let activeQuestions = [];
+/** @type {null | { locked: boolean, userAnswer: boolean, ok: boolean, hintText: string }} */
+let quizSession = [];
 let idx = 0;
 let score = 0;
 let answeredCurrent = false;
@@ -151,32 +154,108 @@ function showPick() {
   ui.resultCard.classList.add("hidden");
   ui.btnO.disabled = false;
   ui.btnX.disabled = false;
+  if (ui.homeBtn) ui.homeBtn.classList.add("hidden");
+}
+
+function hasQuizProgress() {
+  if (!activeQuestions.length) return false;
+  if (idx > 0 || answeredCurrent) return true;
+  return quizSession.some((s) => s != null);
+}
+
+function goHome() {
+  if (!ui.pickCard.classList.contains("hidden")) return;
+  const inQuiz = !ui.quizCard.classList.contains("hidden");
+  const inResult = !ui.resultCard.classList.contains("hidden");
+  if (inQuiz && hasQuizProgress()) {
+    if (!window.confirm("처음 화면(과목·단원 선택)으로 돌아갈까요?")) return;
+  } else if (inResult) {
+    if (!window.confirm("처음 화면(과목·단원 선택)으로 돌아갈까요?")) return;
+  }
+  activeQuestions = [];
+  quizSession = [];
+  idx = 0;
+  score = 0;
+  answeredCurrent = false;
+  showPick();
 }
 
 function showQuiz() {
   ui.pickCard.classList.add("hidden");
   ui.quizCard.classList.remove("hidden");
   ui.resultCard.classList.add("hidden");
+  if (ui.homeBtn) ui.homeBtn.classList.remove("hidden");
+}
+
+function parseQuestionParts(q) {
+  const body = (q.body || "").toString();
+  const marker = "\n\n선지:";
+  if (body.includes(marker)) {
+    const [stem, choice] = body.split(marker);
+    const stemT = stem.replace(/^문제:\s*/, "").trim();
+    const choiceT = choice.trim();
+    return { stem: stemT, choice: choiceT };
+  }
+  if (body.includes("선지:")) {
+    const parts = body.split("선지:");
+    const stemT = parts[0].replace(/^문제:\s*/, "").trim();
+    const choiceT = (parts[1] || "").trim();
+    return { stem: stemT, choice: choiceT };
+  }
+  return { stem: body.trim(), choice: "" };
+}
+
+/** 4지선다형 기출 꼬리 문구 — OX 화면에서는 지문만 보이도록 제거(데이터·저장 키는 그대로) */
+function stripMcQuestionTail(stem) {
+  if (!stem) return stem;
+  const patterns = [
+    /\s*에\s*대한\s*설명으로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+    /\s*중\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+    /\s*으로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+    /(?<!으)\s*로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+    /\s*으로\s*가장\s*옳은\s*것은\??\s*$/u,
+    /\s*경우로\s*가장\s*옳은\s*것은\??\s*$/u,
+    /(?<!으)\s*로\s*가장\s*옳은\s*것은\??\s*$/u,
+    /\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+    /\s*가장\s*옳은\s*것은\??\s*$/u,
+  ];
+  let s = stem;
+  for (const re of patterns) {
+    s = s.replace(re, "");
+  }
+  return s.trim();
+}
+
+function fillQuestionPanels(q) {
+  const { stem, choice } = parseQuestionParts(q);
+  ui.question.textContent = stripMcQuestionTail(stem);
+  if (ui.choiceText) ui.choiceText.textContent = choice;
 }
 
 function renderQuestion() {
   const q = activeQuestions[idx];
   ui.progress.textContent = `${idx + 1} / ${activeQuestions.length}`;
   ui.score.textContent = `점수 ${score}`;
-  const body = (q.body || "").toString();
-  const marker = "\n\n선지:";
-  if (body.includes(marker)) {
-    const [stem, choice] = body.split(marker);
-    ui.question.textContent = stem.replace(/^문제:\s*/, "").trim();
-    if (ui.choiceText) ui.choiceText.textContent = choice.trim();
-  } else if (body.includes("선지:")) {
-    const parts = body.split("선지:");
-    ui.question.textContent = parts[0].replace(/^문제:\s*/, "").trim();
-    if (ui.choiceText) ui.choiceText.textContent = (parts[1] || "").trim();
-  } else {
-    ui.question.textContent = body;
-    if (ui.choiceText) ui.choiceText.textContent = "";
+  fillQuestionPanels(q);
+
+  const slot = quizSession[idx];
+  if (slot?.locked) {
+    ui.hint.textContent = slot.hintText;
+    answeredCurrent = true;
+    ui.btnO.disabled = true;
+    ui.btnX.disabled = true;
+    if (ui.confirmBtn) ui.confirmBtn.disabled = false;
+    return;
   }
+  if (slot && !slot.locked) {
+    ui.hint.textContent = slot.hintText;
+    answeredCurrent = true;
+    ui.btnO.disabled = true;
+    ui.btnX.disabled = true;
+    if (ui.confirmBtn) ui.confirmBtn.disabled = false;
+    return;
+  }
+
   ui.hint.textContent = "";
   answeredCurrent = false;
   ui.btnO.disabled = false;
@@ -187,19 +266,24 @@ function renderQuestion() {
 function finish() {
   ui.quizCard.classList.add("hidden");
   ui.resultCard.classList.remove("hidden");
+  if (ui.homeBtn) ui.homeBtn.classList.remove("hidden");
   ui.finalScore.textContent = `${activeQuestions.length}문제 중 ${score}개 맞음`;
 }
 
 function answer(userAnswer) {
+  const slot = quizSession[idx];
+  if (slot?.locked) return;
   if (answeredCurrent) return;
   const q = activeQuestions[idx];
   const ok = userAnswer === q.answer;
+  const hintText = ok ? `정답. ${q.explanation}` : `오답. ${q.explanation}`;
+  quizSession[idx] = { locked: false, userAnswer, ok, hintText };
   if (ok) {
     score += 1;
     const uid = ui.unitSelect.value;
     if (uid) markMastered(uid, q);
   }
-  ui.hint.textContent = ok ? `정답. ${q.explanation}` : `오답. ${q.explanation}`;
+  ui.hint.textContent = hintText;
   answeredCurrent = true;
   ui.btnO.disabled = true;
   ui.btnX.disabled = true;
@@ -208,7 +292,11 @@ function answer(userAnswer) {
 
 function goNext() {
   if (!answeredCurrent) return;
+  const slot = quizSession[idx];
+  if (!slot) return;
+  if (!slot.locked) slot.locked = true;
   idx += 1;
+  answeredCurrent = false;
   if (idx >= activeQuestions.length) {
     finish();
     return;
@@ -244,7 +332,14 @@ function start() {
     window.alert("이 단원은 맞춘 문제·출제 제외 번호를 반영하면 남은 문제가 없습니다.");
     return;
   }
+  if (list.length < SESSION_QUESTION_COUNT) {
+    window.alert(
+      `선지 단위 문항이 ${SESSION_QUESTION_COUNT}개 미만입니다(현재 ${list.length}개). 한 세션은 ${SESSION_QUESTION_COUNT}문항으로 진행됩니다.`
+    );
+    return;
+  }
   activeQuestions = shuffleCopy(list).slice(0, SESSION_QUESTION_COUNT);
+  quizSession = activeQuestions.map(() => null);
   idx = 0;
   score = 0;
   showQuiz();
@@ -254,6 +349,7 @@ function start() {
 function retry() {
   idx = 0;
   score = 0;
+  quizSession = [];
   ui.resultCard.classList.add("hidden");
   start();
 }
@@ -264,6 +360,7 @@ function bind() {
   ui.btnO.addEventListener("click", () => answer(true));
   ui.btnX.addEventListener("click", () => answer(false));
   if (ui.confirmBtn) ui.confirmBtn.addEventListener("click", goNext);
+  if (ui.homeBtn) ui.homeBtn.addEventListener("click", goHome);
   ui.retryBtn.addEventListener("click", retry);
 }
 

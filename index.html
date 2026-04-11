@@ -9,7 +9,14 @@
   <body>
     <main class="app">
       <header class="top">
-        <h1>OX 퀴즈</h1>
+        <div class="topRow">
+          <h1>OX 퀴즈</h1>
+          <button id="homeBtn" class="btn-icon-home hidden" type="button" aria-label="처음으로" title="처음으로">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5Z" />
+            </svg>
+          </button>
+        </div>
       </header>
 
       <section class="card" id="pickCard">
@@ -20,9 +27,9 @@
         <button id="startBtn" class="btn btn-start" type="button">시작</button>
       </section>
 
-      <section class="card hidden" id="quizCard">
+      <section class="card card-quiz hidden" id="quizCard">
         <div class="meta">
-          <span id="progress">1 / 1</span>
+          <span id="progress">1 / 20</span>
           <span id="score">점수 0</span>
         </div>
         <div class="qaBox">
