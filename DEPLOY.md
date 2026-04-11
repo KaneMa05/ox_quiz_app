@@ -20,6 +20,24 @@
    (`env.example.txt` 참고)
 4. Deploy.
 
+### 배포가 반영되지 않을 때 (체크리스트)
+
+1. **Root Directory**  
+   Vercel 프로젝트 → **Settings → General → Root Directory**가 반드시 **`ox-quiz-app`** 인지 확인하세요.  
+   비어 있거나 저장소 루트(`Demo/`)이면 **일기 앱 등 다른 폴더가 배포**되고, OX 퀴즈 변경은 이 URL에 나타나지 않습니다. OX 전용으로는 **같은 Git 저장소라도 Vercel 프로젝트를 하나 더 만들고** Root만 `ox-quiz-app`으로 두는 방식이 안전합니다.
+
+2. **올바른 URL·배포**  
+   대시보드 **Deployments**에서 최신 커밋 메시지·SHA가 방금 푸시한 것과 같은지 확인하세요. **Preview** URL이 아니라 **Production** 도메인을 보고 있는지도 확인합니다.
+
+3. **빌드 실패**  
+   해당 배포가 **Ready**(초록)인지, **Error**면 로그를 열어 실패 원인을 먼저 해결합니다.
+
+4. **브라우저 캐시**  
+   강력 새로고침(Windows: `Ctrl+Shift+R`) 또는 시크릿 창에서 열어 봅니다. 이 저장소의 `vercel.json`은 문서·API 응답에 캐시를 거의 쓰지 않도록 설정합니다.
+
+5. **Git 푸시 대상**  
+   Vercel이 연결한 **브랜치**(보통 `main`)에 푸시했는지, 다른 브랜치·다른 원격만 갱신하지 않았는지 확인합니다.
+
 ## 3. 동작 방식
 
 - 브라우저가 `/api/env?format=json`으로 키를 읽고, Supabase에서 `quiz_subjects`, `quiz_units`, `quiz_questions`, `quiz_settings`(출제 제외 번호)를 조회합니다.
