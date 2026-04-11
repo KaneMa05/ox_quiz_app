@@ -27,6 +27,8 @@ let score = 0;
 let answeredCurrent = false;
 const USE_LOCAL_ONLY = true;
 const MASTERED_KEY = "ox-mastered-v1";
+/** 같은 문항(body)을 이 횟수만큼 맞추면 이후 출제에서 제외 */
+const MASTER_EXCLUDE_AFTER_CORRECT = 2;
 
 function readMasteredMap() {
   try {
@@ -47,17 +49,27 @@ function writeMasteredMap(next) {
   }
 }
 
-function isMastered(unitId, question) {
+/** @returns {number} 해당 문항을 맞춘 누적 횟수 (구버전 true → 2로 간주해 계속 제외) */
+function getCorrectCount(unitId, body) {
   const map = readMasteredMap();
   const unitMap = map[unitId];
-  if (!unitMap || typeof unitMap !== "object") return false;
-  return !!unitMap[question.body];
+  if (!unitMap || typeof unitMap !== "object") return 0;
+  const v = unitMap[body];
+  if (v === true) return MASTER_EXCLUDE_AFTER_CORRECT;
+  if (typeof v === "number" && Number.isFinite(v)) return Math.max(0, Math.floor(v));
+  return 0;
 }
 
-function markMastered(unitId, question) {
+function isMastered(unitId, question) {
+  return getCorrectCount(unitId, question.body) >= MASTER_EXCLUDE_AFTER_CORRECT;
+}
+
+function recordCorrect(unitId, question) {
   const map = readMasteredMap();
   if (!map[unitId] || typeof map[unitId] !== "object") map[unitId] = {};
-  map[unitId][question.body] = true;
+  const body = question.body;
+  const next = Math.min(MASTER_EXCLUDE_AFTER_CORRECT, getCorrectCount(unitId, body) + 1);
+  map[unitId][body] = next;
   writeMasteredMap(map);
 }
 
@@ -281,7 +293,7 @@ function answer(userAnswer) {
   if (ok) {
     score += 1;
     const uid = ui.unitSelect.value;
-    if (uid) markMastered(uid, q);
+    if (uid) recordCorrect(uid, q);
   }
   ui.hint.textContent = hintText;
   answeredCurrent = true;
@@ -329,7 +341,9 @@ function start() {
       (q.packNo == null || !excluded.has(Number(q.packNo))) && !isMastered(uid, q)
   );
   if (!list.length) {
-    window.alert("이 단원은 맞춘 문제·출제 제외 번호를 반영하면 남은 문제가 없습니다.");
+    window.alert(
+      "이 단원은 2회 이상 맞춘 문항·출제 제외 번호를 반영하면 남은 문제가 없습니다."
+    );
     return;
   }
   if (list.length < SESSION_QUESTION_COUNT) {
