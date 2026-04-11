@@ -1,0 +1,2 @@
+# Do not deploy dev tools / SQL generators to static hosting
+tools/

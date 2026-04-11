@@ -1,0 +1,4 @@
+# Vision pipeline (image_to_quiz_questions.py). Prefer over OCR for cleaner Korean extraction.
+openai>=1.12.0
+Pillow>=10.0.0
+pymupdf>=1.24.0

@@ -1,0 +1,334 @@
+{
+  "meta": {
+    "source": "user_image_descriptions_2026",
+    "book": "해양경찰학개론 기출문제집 / 해양경찰의 개념 등",
+    "note": "이미지 전사 설명 기준. 실제 책·시험지와 다를 수 있으니 검수하세요."
+  },
+  "questions": [
+    {
+      "id": "p22-q04",
+      "page_hint": 22,
+      "stem": "우리나라 해양경찰 조직의 발전과정 중 중요한 사건에 대한 설명이다. 시간 순서대로 가장 바르게 연결한 것은? (㉠ 중부지방해양경비안전본부 신설, ㉡ 「배타적경제수역법」 제정·시행, ㉢ 해양경찰청이 경찰청과 분리·해양수산부 외청 독립, ㉣내무부 치안국→치안본부 격상과 해양경찰대 치안본부 소속 변경)",
+      "choices": [
+        {"marker": "①", "text": "㉣ - ㉢ - ㉡ - ㉠", "correct": true},
+        {"marker": "②", "text": "㉣ - ㉡ - ㉢ - ㉠", "correct": false},
+        {"marker": "③", "text": "㉣ - ㉢ - ㉠ - ㉡", "correct": false},
+        {"marker": "④", "text": "㉣ - ㉡ - ㉠ - ㉢", "correct": false}
+      ],
+      "answer_marker": "①",
+      "explanation_summary": "해설: ㉣ 1974.12 → ㉢ 1996.8 → ㉡ 1996.9 → ㉠ 2014.11"
+    },
+    {
+      "id": "p22-q05",
+      "page_hint": 22,
+      "stem": "다음 중 대한민국 해양경찰의 역사에 대한 내용으로 가장 옳지 않은 것은?",
+      "choices": [
+        {"marker": "①", "text": "1953년내무부 치안국 소속 해양경찰대로 발족, 영해경비·어업자원보호 등.", "correct": false},
+        {"marker": "②", "text": "1955년 소속부처가 교통부 산하 해무청으로 이관, 명칭 '해양경비대'로 개칭.", "correct": true},
+        {"marker": "③", "text": "2014년 국민안전처 소속 해양경비안전본부로 개편.", "correct": false},
+        {"marker": "④", "text": "2017년 해양수산부 외청으로 해양경찰청 부활.", "correct": false}
+      ],
+      "answer_marker": "②",
+      "explanation_summary": "1955년 이관은 상공부(교통부 X) 해무청."
+    },
+    {
+      "id": "p20-q10",
+      "page_hint": 20,
+      "stem": "다음 <보기>의 비교해양경제도에 대한 설명으로 옳지 않은 것은 모두 몇 개인가? (㉠~㉥ 미국·일본·중국 해경 관련 진술)",
+      "choices": [
+        {"marker": "①", "text": "2개", "correct": true},
+        {"marker": "②", "text": "3개", "correct": false},
+        {"marker": "③", "text": "4개", "correct": false},
+        {"marker": "④", "text": "5개", "correct": false}
+      ],
+      "answer_marker": "①",
+      "explanation_summary": "틀린 설명: ㉡(미국 Area/District/Sector 수), ㉥(무장경찰 편입 시기 등)."
+    },
+    {
+      "id": "p20-q01",
+      "page_hint": 20,
+      "stem": "해양경찰의 변천사 ( ) 안에 들어갈 말을 차례로 나열한 것은? (㉠ 창설일·1955 상공부 해무청·1962년내무부 복귀·1991 경찰청 편입·㉡ 해양수산부 발족과 외청 독립일)",
+      "choices": [
+        {"marker": "①", "text": "㉠ 1953, ㉡ 1996", "correct": true},
+        {"marker": "②", "text": "㉠ 1950, ㉡ 1993", "correct": false},
+        {"marker": "③", "text": "㉠ 1951, ㉡ 1992", "correct": false},
+        {"marker": "④", "text": "㉠ 1952, ㉡ 1995", "correct": false}
+      ],
+      "answer_marker": "①",
+      "explanation_summary": "㉠ 1953년, ㉡ 1996년 8월 8일."
+    },
+    {
+      "id": "p21-q02",
+      "page_hint": 21,
+      "stem": "해양경찰의 역사와 관련하여 다음 설명 중 옳지 않은 것을 모두 고르시오. (㉠~㉣)",
+      "choices": [
+        {"marker": "①", "text": "㉠, ㉢", "correct": false},
+        {"marker": "②", "text": "㉡, ㉢", "correct": false},
+        {"marker": "③", "text": "㉡, ㉣", "correct": true},
+        {"marker": "④", "text": "㉢, ㉣", "correct": false}
+      ],
+      "answer_marker": "③",
+      "explanation_summary": "㉡ 신분 계속 경찰공무원 X, ㉣ 2017 부활은 해양수산부(국토교통부 X)."
+    },
+    {
+      "id": "p21-q03",
+      "page_hint": 21,
+      "stem": "「수난구호법」 제정 이후 일로 가장 옳은 것은? (「수상에서의 수색·구조 등에 관한 법률」 제명 변경 배경)",
+      "choices": [
+        {"marker": "①", "text": "'인접해양의 주권에 관한 대통령 선언'·평화선.", "correct": false},
+        {"marker": "②", "text": "평화선 침범 외국어선 단속·어업자원 보호 위해 해양경찰대 창설.", "correct": false},
+        {"marker": "③", "text": "상공부 해무청 소속 해양경비대가 해양경비대사령부로 개칭.", "correct": false},
+        {"marker": "④", "text": "상공부에서내무부 치안국 소속 해양경찰대로 변경.", "correct": true}
+      ],
+      "answer_marker": "④",
+      "explanation_summary": "수난구호법 1961년 제정 이후 해당 시점은 ④(1962)."
+    },
+    {
+      "id": "p25-q10",
+      "page_hint": 25,
+      "stem": "다음 중 해양경찰과 관련된 내용으로 옳지 않은 것은 모두 몇 개인가? (㉠~㉣)",
+      "choices": [
+        {"marker": "①", "text": "1개", "correct": false},
+        {"marker": "②", "text": "2개", "correct": false},
+        {"marker": "③", "text": "3개", "correct": true},
+        {"marker": "④", "text": "4개", "correct": false}
+      ],
+      "answer_marker": "③",
+      "explanation_summary": "틀린 설명: ㉠, ㉡, ㉣."
+    },
+    {
+      "id": "p25-q11",
+      "page_hint": 25,
+      "stem": "다음 중 해양경찰 역사에 대한 설명으로 가장 옳지 않은 것은?",
+      "choices": [
+        {"marker": "①", "text": "인접해양 주권 대통령 선언 1952 선포, 1965 한·일 어업협정으로 폐지.", "correct": false},
+        {"marker": "②", "text": "1991 경찰법 제정으로 경찰청·해양경찰청 각각 독립외청 발전.", "correct": true},
+        {"marker": "③", "text": "1955 상공부 해무청으로 소속 변경, 신분 변화 있음.", "correct": false},
+        {"marker": "④", "text": "1953 창설, 2023 창설 70주년.", "correct": false}
+      ],
+      "answer_marker": "②",
+      "explanation_summary": "1991 해양경찰청은 경찰청 소속 유지, 1996 해양수산부 외청 독립."
+    },
+    {
+      "id": "p23-q06",
+      "page_hint": 23,
+      "stem": "<보기> 중 해양경찰 역사와 관련해 옳은 설명은 모두 몇 개인가? (㉠~㉤)",
+      "choices": [
+        {"marker": "①", "text": "1개", "correct": false},
+        {"marker": "②", "text": "2개", "correct": true},
+        {"marker": "③", "text": "3개", "correct": false},
+        {"marker": "④", "text": "4개", "correct": false}
+      ],
+      "answer_marker": "②",
+      "explanation_summary": "옳은 것: ㉠, ㉢."
+    },
+    {
+      "id": "p23-q07",
+      "page_hint": 23,
+      "stem": "<보기> 조직 발전 과정을 시간 순으로 옳게 나열한 것은? (㉠ 수산업법~㉤ 치안본부 편성)",
+      "choices": [
+        {"marker": "①", "text": "㉠ - ㉤ - ㉢ - ㉡ - ㉣", "correct": true},
+        {"marker": "②", "text": "㉤ - ㉠ - ㉢ - ㉡ - ㉣", "correct": false},
+        {"marker": "③", "text": "㉠ - ㉤ - ㉡ - ㉣ - ㉢", "correct": false},
+        {"marker": "④", "text": "㉤ - ㉠ - ㉣ - ㉢ - ㉡", "correct": false}
+      ],
+      "answer_marker": "①",
+      "explanation_summary": "연도 순서 해설 참고."
+    },
+    {
+      "id": "p24-q08",
+      "page_hint": 24,
+      "stem": "해양경찰 관련 근·현대 역사 설명 중 사실과 가장 다른 것은?",
+      "choices": [
+        {"marker": "①", "text": "1952 인접해양 주권 대통령 선언·평균 60마일 주권선.", "correct": false},
+        {"marker": "②", "text": "1953.12 해양경찰이 해군에서 경비정 6척 확보 창설.", "correct": false},
+        {"marker": "③", "text": "1955.2 「정부조직법」 개정으로내무부 산하 치안본부 편성.", "correct": true},
+        {"marker": "④", "text": "1965.6 한·일 국교정상화 기본조약·어업협정.", "correct": false}
+      ],
+      "answer_marker": "③",
+      "explanation_summary": "1955년은 상공부 해무청 수산국 소속(내무부 치안본부 X)."
+    },
+    {
+      "id": "p24-q09",
+      "page_hint": 24,
+      "stem": "해양경찰의 역사와 관련하여 가장 옳지 않은 것은?",
+      "choices": [
+        {"marker": "①", "text": "1953 부산 창설.", "correct": false},
+        {"marker": "②", "text": "1953 이후 지금까지 신분은 계속 일반사법경찰관리.", "correct": true},
+        {"marker": "③", "text": "1996 해양수산부 외청 독립.", "correct": false},
+        {"marker": "④", "text": "2019 「해양경찰법」 제정.", "correct": false}
+      ],
+      "answer_marker": "②",
+      "explanation_summary": "1955~1962 해양경비원·특별사법경찰관 시기 있음."
+    },
+    {
+      "id": "p30-q20",
+      "page_hint": 30,
+      "stem": "<보기> 중 해양경찰청이 단독 소관하는 법률을 옳게 연결한 것은? (㉠~㉥)",
+      "choices": [
+        {"marker": "①", "text": "㉠, ㉡, ㉢, ㉥", "correct": true},
+        {"marker": "②", "text": "㉠, ㉢, ㉣, ㉤", "correct": false},
+        {"marker": "③", "text": "㉠, ㉡, ㉢, ㉤", "correct": false},
+        {"marker": "④", "text": "㉠, ㉢, ㉤, ㉥", "correct": false}
+      ],
+      "answer_marker": "①",
+      "explanation_summary": "㉣ 존재하지 않는 법명, ㉤ 해양수산부 소관."
+    },
+    {
+      "id": "p30-q21",
+      "page_hint": 30,
+      "stem": "해양경찰청 직접 소관법 제정 시기를 시간 순으로 옳게 나열한 것은? (㉠~㉣)",
+      "choices": [
+        {"marker": "①", "text": "㉠ → ㉡ → ㉢ → ㉣", "correct": false},
+        {"marker": "②", "text": "㉠ → ㉣ → ㉡ → ㉢", "correct": false},
+        {"marker": "③", "text": "㉡ → ㉣ → ㉠ → ㉢", "correct": false},
+        {"marker": "④", "text": "㉡ → ㉠ → ㉢ → ㉣", "correct": true}
+      ],
+      "answer_marker": "④",
+      "explanation_summary": "㉡ 해양경비법 → ㉠ 연안사고 → ㉢ 선박교통관제 → ㉣ 장비법 순(해설 연표)."
+    },
+    {
+      "id": "p32-q24",
+      "page_hint": 32,
+      "stem": "다음 중 해양경찰청이 다른 부처와 공동으로 소관하는 법률로 가장 옳지 않은 것은?",
+      "choices": [
+        {"marker": "①", "text": "「밀항단속법」", "correct": false},
+        {"marker": "②", "text": "「경찰관 직무집행법」", "correct": true},
+        {"marker": "③", "text": "「경찰공무원법」", "correct": false},
+        {"marker": "④", "text": "「재난 및 안전관리기본법」", "correct": false}
+      ],
+      "answer_marker": "②",
+      "explanation_summary": "경찰관 직무집행법은 경찰청 단독 소관."
+    },
+    {
+      "id": "p28-q16",
+      "page_hint": 28,
+      "stem": "<보기> 해양경찰 역사를 시대순으로 옳게 나열한 것은? (㉠~㉣)",
+      "choices": [
+        {"marker": "①", "text": "㉠ → ㉡ → ㉢ → ㉣", "correct": false},
+        {"marker": "②", "text": "㉣ → ㉡ → ㉢ → ㉠", "correct": false},
+        {"marker": "③", "text": "㉣ → ㉢ → ㉠ → ㉡", "correct": true},
+        {"marker": "④", "text": "㉣ → ㉢ → ㉡ → ㉠", "correct": false}
+      ],
+      "answer_marker": "③",
+      "explanation_summary": "㉣1955 → ㉢1961 → ㉠1962 → ㉡1979."
+    },
+    {
+      "id": "p28-q17",
+      "page_hint": 28,
+      "stem": "<보기> 조직 발전 주요 사건을 시간 순으로 바르게 나열한 것은? (㉠~㉡)",
+      "choices": [
+        {"marker": "①", "text": "㉣ - ㉢ - ㉤ - ㉠ - ㉡", "correct": true},
+        {"marker": "②", "text": "㉣ - ㉢ - ㉤ - ㉡ - ㉠", "correct": false},
+        {"marker": "③", "text": "㉣ - ㉤ - ㉢ - ㉠ - ㉡", "correct": false},
+        {"marker": "④", "text": "㉣ - ㉤ - ㉢ - ㉡ - ㉠", "correct": false}
+      ],
+      "answer_marker": "①",
+      "explanation_summary": "수난구호법→수상레저→특공대→해양경비법→서해5도 순."
+    },
+    {
+      "id": "p31-q22",
+      "page_hint": 31,
+      "stem": "<보기> 해양경찰청 단독 소관 법률의 제정 시기를 시간 순으로 옳게 나열한 것은? (ㄱ~ㅁ)",
+      "choices": [
+        {"marker": "①", "text": "ㄱ - ㄷ - ㄴ - ㄹ - ㅁ", "correct": true},
+        {"marker": "②", "text": "ㄱ - ㄴ - ㄷ - ㄹ - ㅁ", "correct": false},
+        {"marker": "③", "text": "ㄷ - ㄱ - ㄴ - ㄹ - ㅁ", "correct": false},
+        {"marker": "④", "text": "ㄷ - ㄱ - ㄴ - ㅁ - ㄹ", "correct": false}
+      ],
+      "answer_marker": "①",
+      "explanation_summary": "2012→2014→2019→2021→2024 제정 순."
+    },
+    {
+      "id": "p31-q23",
+      "page_hint": 31,
+      "stem": "다음 중 해양경찰청 소관 법률로 가장 옳지 않은 것은?",
+      "choices": [
+        {"marker": "①", "text": "「밀항단속법」", "correct": false},
+        {"marker": "②", "text": "「연안사고 예방에 관한 법률」", "correct": false},
+        {"marker": "③", "text": "「해양환경관리법」", "correct": true},
+        {"marker": "④", "text": "「선박교통관제에 관한 법률」", "correct": false}
+      ],
+      "answer_marker": "③",
+      "explanation_summary": "해양환경관리법은 해양수산부 소관."
+    },
+    {
+      "id": "p26-q12",
+      "page_hint": 26,
+      "stem": "<보기> 해양경찰 역사를 시대 순으로 바르게 연결한 것은? (㉠~㉤)",
+      "choices": [
+        {"marker": "①", "text": "㉡ - ㉢ - ㉠ - ㉣ - ㉤", "correct": false},
+        {"marker": "②", "text": "㉡ - ㉢ - ㉣ - ㉠ - ㉤", "correct": false},
+        {"marker": "③", "text": "㉣ - ㉡ - ㉤ - ㉠ - ㉢", "correct": true},
+        {"marker": "④", "text": "㉣ - ㉡ - ㉠ - ㉤ - ㉢", "correct": false}
+      ],
+      "answer_marker": "③",
+      "explanation_summary": "해설 연도표 참고."
+    },
+    {
+      "id": "p26-q13",
+      "page_hint": 26,
+      "stem": "해양경찰 조직연혁에 관한 설명으로 가장 옳은 것은?",
+      "choices": [
+        {"marker": "①", "text": "1996.8.8 해양경찰청은 행정안전부 외청으로 독립.", "correct": false},
+        {"marker": "②", "text": "2014.11.19 중부지방해양경찰청 신설 전까지 인천해양경찰서는 서해지방해양경찰청 소속.", "correct": false},
+        {"marker": "③", "text": "2006.2.22 4개 지역에 지방해양경찰본부 신설.", "correct": true},
+        {"marker": "④", "text": "2005.7.22 청장 직급이 치안감에서 치안총감으로 격상.", "correct": false}
+      ],
+      "answer_marker": "③",
+      "explanation_summary": "① 해양수산부 외청, ② 본청 직할, ④ 치안정감→치안총감."
+    },
+    {
+      "id": "p29-q18",
+      "page_hint": 29,
+      "stem": "다음 중 해양경찰 소관 법률 설명으로 가장 옳지 않은 것은?",
+      "choices": [
+        {"marker": "①", "text": "「수상에서의 수색·구조 등에 관한 법률」은 SAR 수용.", "correct": false},
+        {"marker": "②", "text": "「밀항단속법」은 해경·법내무부 공동 소관.", "correct": false},
+        {"marker": "③", "text": "「연안사고 예방에 관한 법률」보다 「해양경비법」이 먼저 제정.", "correct": false},
+        {"marker": "④", "text": "「수상레저안전법」은 한국해양구조협회 근거법.", "correct": true}
+      ],
+      "answer_marker": "④",
+      "explanation_summary": "한국해양구조협회 근거는 「수상에서의 수색·구조 등에 관한 법률」."
+    },
+    {
+      "id": "p29-q19",
+      "page_hint": 29,
+      "stem": "다음 중 해양경찰청이 단독으로 소관하는 법률은 모두 몇 개인가? (㉠~㉧)",
+      "choices": [
+        {"marker": "①", "text": "4개", "correct": false},
+        {"marker": "②", "text": "5개", "correct": true},
+        {"marker": "③", "text": "6개", "correct": false},
+        {"marker": "④", "text": "7개", "correct": false}
+      ],
+      "answer_marker": "②",
+      "explanation_summary": "해경 단독 5개, 해수부 등 나머지."
+    },
+    {
+      "id": "p27-q14",
+      "page_hint": 27,
+      "stem": "다음 중 해양경찰 조직연혁에 대한 설명으로 가장 옳지 않은 것은?",
+      "choices": [
+        {"marker": "①", "text": "2005.7.22 청장 직급 치안정감→치안총감.", "correct": false},
+        {"marker": "②", "text": "2006.11.9 지방본부를 동·서·남·제주 4개 지방해양경찰청으로 재편.", "correct": true},
+        {"marker": "③", "text": "2014.11.19 중부지방해양경찰청 신설 전 인천해양경찰서는 본청 직할.", "correct": false},
+        {"marker": "④", "text": "2017.7.26 국민안전처에서 해양수산부 외청 독립.", "correct": false}
+      ],
+      "answer_marker": "②",
+      "explanation_summary": "2006년 11월 재편은 제주 X, 동·서·남해."
+    },
+    {
+      "id": "p27-q15",
+      "page_hint": 27,
+      "stem": "다음 중 해양경찰 역사에 대한 설명으로 가장 옳은 것은?",
+      "choices": [
+        {"marker": "①", "text": "1953.12.23 부산 창설, 1978.10 인천 이전.", "correct": false},
+        {"marker": "②", "text": "1962 「해양경찰대설치법」 제정, 1969 동해·서해 어로보호본부.", "correct": true},
+        {"marker": "③", "text": "2005 청장 격상, 2006 동·서·남·중부지방해양경찰청 신설.", "correct": false},
+        {"marker": "④", "text": "2014 국민안전처 해경비안전본부 개편, 본부장 치안정감·청사 세종.", "correct": false}
+      ],
+      "answer_marker": "②",
+      "explanation_summary": "① 인천 이전 1979, ③ 중부 2014, ④ 본부장 직급 유지 등."
+    }
+  ]
+}

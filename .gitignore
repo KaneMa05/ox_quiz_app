@@ -1,7 +1,10 @@
 node_modules/
+__pycache__/
+*.pyc
 .env
 .env.local
 .env.*.local
+api.env.local
 
 tools/_tmp_mdp_sync.sql
 tools/_verify_out.txt
