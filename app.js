@@ -444,7 +444,7 @@ function answer(userAnswer) {
     score += 1;
     if (uid) {
       recordCorrect(uid, q);
-      removeWrong(uid, q);
+      if (!wrongReviewMode) removeWrong(uid, q);
     }
   } else if (uid) {
     addWrong(uid, q);
@@ -564,7 +564,7 @@ function startWrongReview() {
   if (!list.length) {
     window.alert(
       wrongReviewMode
-        ? "이 단원에 더 모아볼 오답이 없습니다. (맞춘 문항은 오답 목록에서 빠집니다.)"
+        ? "이 단원에 더 모아볼 오답이 없습니다. (오답 모아보기에서 맞춰도 목록은 유지되며, 하단 「오답 목록에서 제거」로만 지울 수 있습니다.)"
         : "이 단원에 저장된 오답이 없습니다. 일반 퀴즈에서 틀린 문항이 쌓이면 여기서 모아볼 수 있습니다."
     );
     wrongReviewMode = false;
