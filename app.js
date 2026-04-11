@@ -25,7 +25,8 @@ let quizSession = [];
 let idx = 0;
 let score = 0;
 let answeredCurrent = false;
-const USE_LOCAL_ONLY = true;
+/** false: `/api/env?format=json`로 키를 읽고 Supabase에서 과목·단원·문제를 불러옴. 실패 시 data.js 유지 */
+const USE_LOCAL_ONLY = false;
 const MASTERED_KEY = "ox-mastered-v1";
 /** 같은 문항(body)을 이 횟수만큼 맞추면 이후 출제에서 제외 */
 const MASTER_EXCLUDE_AFTER_CORRECT = 2;
@@ -60,14 +61,23 @@ function getCorrectCount(unitId, body) {
   return 0;
 }
 
+function questionBodyKey(q) {
+  const b = (q.body != null && String(q.body).trim() !== "") ? String(q.body).trim() : "";
+  if (b) return b;
+  const qq = (q.question != null ? String(q.question) : "").trim();
+  const ct = (q.choice_text != null ? String(q.choice_text) : "").trim();
+  if (qq && ct) return `문제: ${qq}\n\n선지: ${ct}`;
+  return "";
+}
+
 function isMastered(unitId, question) {
-  return getCorrectCount(unitId, question.body) >= MASTER_EXCLUDE_AFTER_CORRECT;
+  return getCorrectCount(unitId, questionBodyKey(question)) >= MASTER_EXCLUDE_AFTER_CORRECT;
 }
 
 function recordCorrect(unitId, question) {
   const map = readMasteredMap();
   if (!map[unitId] || typeof map[unitId] !== "object") map[unitId] = {};
-  const body = question.body;
+  const body = questionBodyKey(question);
   const next = Math.min(MASTER_EXCLUDE_AFTER_CORRECT, getCorrectCount(unitId, body) + 1);
   map[unitId][body] = next;
   writeMasteredMap(map);
@@ -107,7 +117,15 @@ function buildCurriculumFromRows(subjects, units, questions) {
         questions: qs
           .filter((q) => q.unit_id === u.id)
           .map((q) => ({
-            body: q.body,
+            packNo: q.pack_no != null ? Number(q.pack_no) : null,
+            question: (q.question ?? "").toString(),
+            choice_text: (q.choice_text ?? "").toString(),
+            body: (() => {
+              if (q.body != null && String(q.body).trim() !== "") return String(q.body).trim();
+              const qq = (q.question ?? "").toString().trim();
+              const ct = (q.choice_text ?? "").toString().trim();
+              return qq && ct ? `문제: ${qq}\n\n선지: ${ct}` : "";
+            })(),
             answer: q.answer,
             explanation: q.explanation || "",
           })),
@@ -127,14 +145,26 @@ async function loadCurriculumFromSupabase(env) {
   const [subRes, unitRes, qRes] = await Promise.all([
     client.from("quiz_subjects").select("id,name,sort_order").order("sort_order"),
     client.from("quiz_units").select("id,subject_id,name,sort_order").order("sort_order"),
-    client.from("quiz_questions").select("id,unit_id,body,answer,explanation,sort_order").order("sort_order"),
+    client
+      .from("quiz_questions")
+      .select("id,unit_id,question,choice_text,body,answer,explanation,sort_order,pack_no")
+      .order("sort_order"),
   ]);
 
   if (subRes.error) throw subRes.error;
   if (unitRes.error) throw unitRes.error;
   if (qRes.error) throw qRes.error;
 
-  return buildCurriculumFromRows(subRes.data, unitRes.data, qRes.data);
+  const cur = buildCurriculumFromRows(subRes.data, unitRes.data, qRes.data);
+
+  const cfgRes = await client.from("quiz_settings").select("value").eq("key", "excluded_pack_nos").maybeSingle();
+  if (!cfgRes.error && cfgRes.data && Array.isArray(cfgRes.data.value) && cfgRes.data.value.length) {
+    window.OX_EXCLUDED_PACK_NOS = cfgRes.data.value
+      .map((n) => Number(n))
+      .filter((n) => Number.isFinite(n));
+  }
+
+  return cur;
 }
 
 function fillSubjects() {
@@ -200,6 +230,10 @@ function showQuiz() {
 }
 
 function parseQuestionParts(q) {
+  const qq = (q.question != null ? String(q.question) : "").trim();
+  const ct = (q.choice_text != null ? String(q.choice_text) : "").trim();
+  if (qq !== "" && ct !== "") return { stem: qq, choice: ct };
+
   const body = (q.body || "").toString();
   const marker = "\n\n선지:";
   if (body.includes(marker)) {
