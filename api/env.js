@@ -1,4 +1,5 @@
-function handler(req, res) {
+/** Vercel Serverless: `package.json`의 `"type": "module"`에 맞춰 ESM default export 사용 */
+export default function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -71,9 +72,6 @@ function handler(req, res) {
   }
 
   res.statusCode = 200;
-  res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+  res.setHeader("Content-Type", "text/javascript; charset=utf-8");
   res.end(`window.ENV = ${JSON.stringify(payload)};`);
 }
-
-module.exports = handler;
-module.exports.default = handler;

@@ -183,9 +183,13 @@ function getWrongKeysForUnit(unitId) {
 async function loadEnvJson() {
   try {
     const res = await fetch("/api/env?format=json", { cache: "no-store" });
-    if (!res.ok) return {};
+    if (!res.ok) {
+      console.warn("OX: /api/env 응답 실패", res.status, res.statusText);
+      return {};
+    }
     return (await res.json()) || {};
-  } catch {
+  } catch (e) {
+    console.warn("OX: /api/env 요청 오류", e);
     return {};
   }
 }
@@ -767,9 +771,9 @@ function renderDataSourceNote() {
   }
   el.classList.remove("hidden");
   el.textContent =
-    "지금은 Supabase DB가 아니라 내장 data.js 예시만 쓰고 있습니다. (해양경찰학개론·역사 단원은 예시가 4문항뿐입니다.) " +
-    "Vercel(또는 호스트) 환경 변수에 SUPABASE_ANON_KEY와 SUPABASE_URL(또는 SUPABASE_PROJECT_ID)을 넣고, " +
-    "/api/env?format=json 이 이 값을 반환하는지 확인한 뒤 새로고침하세요.";
+    "Supabase에 연결되지 않아 내장 data.js 예시만 사용 중입니다. (해양경찰학개론·역사는 예시 4문항.) " +
+    "Vercel → Project → Settings → Environment Variables에 SUPABASE_ANON_KEY와 SUPABASE_URL(또는 SUPABASE_PROJECT_ID)을 추가하고 재배포한 뒤, " +
+    "브라우저에서 /api/env?format=json 을 열어 값이 채워지는지 확인하세요. (개발자 도구 콘솔에 /api/env 관련 경고가 있으면 그 HTTP 상태를 참고하세요.)";
 }
 
 async function boot() {
