@@ -3,6 +3,11 @@ const ui = {
   quizCard: document.getElementById("quizCard"),
   resultCard: document.getElementById("resultCard"),
   subjectSelect: document.getElementById("subjectSelect"),
+  majorUnitRow: document.getElementById("majorUnitRow"),
+  pickTierWrap: document.getElementById("pickTierWrap"),
+  pickUnitRow: document.getElementById("pickUnitRow"),
+  majorSelect: document.getElementById("majorSelect"),
+  minorLabel: document.getElementById("minorLabel"),
   unitSelect: document.getElementById("unitSelect"),
   startBtn: document.getElementById("startBtn"),
   wrongReviewBtn: document.getElementById("wrongReviewBtn"),
@@ -189,36 +194,89 @@ function supabaseUrlFromEnv(env) {
   return "";
 }
 
+function mapQuestionRowFromDb(q) {
+  return {
+    packNo: q.pack_no != null ? Number(q.pack_no) : null,
+    question: (q.question ?? "").toString(),
+    choice_text: (q.choice_text ?? "").toString(),
+    body: (() => {
+      if (q.body != null && String(q.body).trim() !== "") return String(q.body).trim();
+      const qq = (q.question ?? "").toString().trim();
+      const ct = (q.choice_text ?? "").toString().trim();
+      return qq && ct ? `문제: ${qq}\n\n선지: ${ct}` : "";
+    })(),
+    answer: q.answer,
+    explanation: q.explanation || "",
+  };
+}
+
 function buildCurriculumFromRows(subjects, units, questions) {
   const subs = (subjects || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   const uns = (units || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   const qs = (questions || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
-  return subs.map((s) => ({
-    id: s.id,
-    name: s.name,
-    units: uns
-      .filter((u) => u.subject_id === s.id)
-      .map((u) => ({
-        id: u.id,
-        name: u.name,
-        questions: qs
-          .filter((q) => q.unit_id === u.id)
-          .map((q) => ({
-            packNo: q.pack_no != null ? Number(q.pack_no) : null,
-            question: (q.question ?? "").toString(),
-            choice_text: (q.choice_text ?? "").toString(),
-            body: (() => {
-              if (q.body != null && String(q.body).trim() !== "") return String(q.body).trim();
-              const qq = (q.question ?? "").toString().trim();
-              const ct = (q.choice_text ?? "").toString().trim();
-              return qq && ct ? `문제: ${qq}\n\n선지: ${ct}` : "";
-            })(),
-            answer: q.answer,
-            explanation: q.explanation || "",
+  return subs.map((s) => {
+    const sunits = uns.filter((u) => u.subject_id === s.id);
+    const hasHierarchy = sunits.some((u) => u.parent_unit_id);
+
+    if (!hasHierarchy) {
+      return {
+        id: s.id,
+        name: s.name,
+        units: sunits
+          .filter((u) => !u.parent_unit_id)
+          .map((u) => ({
+            id: u.id,
+            name: u.name,
+            questions: qs.filter((qq) => qq.unit_id === u.id).map(mapQuestionRowFromDb),
+          })),
+      };
+    }
+
+    const majors = sunits
+      .filter((u) => !u.parent_unit_id)
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    const minorsByParent = new Map();
+    for (const u of sunits.filter((x) => x.parent_unit_id)) {
+      const pid = u.parent_unit_id;
+      if (!minorsByParent.has(pid)) minorsByParent.set(pid, []);
+      minorsByParent.get(pid).push(u);
+    }
+
+    return {
+      id: s.id,
+      name: s.name,
+      units: majors.map((ma) => ({
+        id: ma.id,
+        name: ma.name,
+        children: (minorsByParent.get(ma.id) || [])
+          .slice()
+          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+          .map((mi) => ({
+            id: mi.id,
+            name: mi.name,
+            questions: qs.filter((qq) => qq.unit_id === mi.id).map(mapQuestionRowFromDb),
           })),
       })),
-  }));
+    };
+  });
+}
+
+/** DB·data.js에서 parent/children으로 만든 계층이면 true(소단원 문항이 0개인 대단원만 있어도 대단원·소단원 UI 유지). */
+function subjectHasTieredUnits(sub) {
+  return !!(sub?.units?.length && sub.units.some((u) => Array.isArray(u.children)));
+}
+
+function findLeafUnit(sub, leafId) {
+  if (!sub?.units || !leafId) return null;
+  if (subjectHasTieredUnits(sub)) {
+    for (const m of sub.units) {
+      const c = m.children?.find((x) => x.id === leafId);
+      if (c) return c;
+    }
+    return null;
+  }
+  return sub.units.find((u) => u.id === leafId) || null;
 }
 
 async function loadCurriculumFromSupabase(env) {
@@ -232,7 +290,7 @@ async function loadCurriculumFromSupabase(env) {
 
   const [subRes, unitRes, qRes] = await Promise.all([
     client.from("quiz_subjects").select("id,name,sort_order").order("sort_order"),
-    client.from("quiz_units").select("id,subject_id,name,sort_order").order("sort_order"),
+    client.from("quiz_units").select("id,subject_id,parent_unit_id,name,sort_order").order("sort_order"),
     client
       .from("quiz_questions")
       .select("id,unit_id,question,choice_text,body,answer,explanation,sort_order,pack_no")
@@ -265,16 +323,50 @@ function fillSubjects() {
   }
 }
 
-function fillUnits() {
+function fillMinorUnits() {
   const sid = ui.subjectSelect.value;
   const sub = curriculum.find((s) => s.id === sid);
+  if (!sub || !subjectHasTieredUnits(sub) || !ui.majorSelect) return;
+  const mid = ui.majorSelect.value;
+  const major = sub.units.find((u) => u.id === mid);
+  const children = major?.children || [];
   ui.unitSelect.innerHTML = "";
-  if (!sub) return;
-  for (const u of sub.units) {
+  for (const c of children) {
     const opt = document.createElement("option");
-    opt.value = u.id;
-    opt.textContent = u.name;
+    opt.value = c.id;
+    opt.textContent = c.name;
     ui.unitSelect.appendChild(opt);
+  }
+}
+
+function fillPickerUnits() {
+  const sid = ui.subjectSelect.value;
+  const sub = curriculum.find((s) => s.id === sid);
+  if (!sub) return;
+  const tiered = subjectHasTieredUnits(sub);
+  if (ui.pickTierWrap) {
+    ui.pickTierWrap.classList.toggle("hidden", !tiered);
+    ui.pickTierWrap.setAttribute("aria-hidden", tiered ? "false" : "true");
+  }
+  if (ui.pickUnitRow) ui.pickUnitRow.classList.toggle("pickUnitRow--minor", tiered);
+  if (ui.minorLabel) ui.minorLabel.textContent = tiered ? "소단원" : "단원";
+  if (tiered && ui.majorSelect) {
+    ui.majorSelect.innerHTML = "";
+    for (const m of sub.units) {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = m.name;
+      ui.majorSelect.appendChild(opt);
+    }
+    fillMinorUnits();
+  } else {
+    ui.unitSelect.innerHTML = "";
+    for (const u of sub.units) {
+      const opt = document.createElement("option");
+      opt.value = u.id;
+      opt.textContent = u.name;
+      ui.unitSelect.appendChild(opt);
+    }
   }
 }
 
@@ -520,7 +612,7 @@ function start() {
   const sid = ui.subjectSelect.value;
   const uid = ui.unitSelect.value;
   const sub = curriculum.find((s) => s.id === sid);
-  const unit = sub?.units.find((u) => u.id === uid);
+  const unit = findLeafUnit(sub, uid);
   const all = unit?.questions || [];
   const excluded = new Set((window.OX_EXCLUDED_PACK_NOS || []).map(Number));
   const list = all.filter(
@@ -533,13 +625,13 @@ function start() {
     );
     return;
   }
+  const take = Math.min(SESSION_QUESTION_COUNT, list.length);
   if (list.length < SESSION_QUESTION_COUNT) {
     window.alert(
-      `선지 단위 문항이 ${SESSION_QUESTION_COUNT}개 미만입니다(현재 ${list.length}개). 한 세션은 ${SESSION_QUESTION_COUNT}문항으로 진행됩니다.`
+      `이 소단원(단원)의 출제 가능 문항이 ${SESSION_QUESTION_COUNT}개 미만입니다(현재 ${list.length}개). ${take}문항으로 진행합니다.`
     );
-    return;
   }
-  activeQuestions = shuffleCopy(list).slice(0, SESSION_QUESTION_COUNT);
+  activeQuestions = shuffleCopy(list).slice(0, take);
   quizSession = activeQuestions.map(() => null);
   idx = 0;
   score = 0;
@@ -551,7 +643,7 @@ function startWrongReview() {
   const sid = ui.subjectSelect.value;
   const uid = ui.unitSelect.value;
   const sub = curriculum.find((s) => s.id === sid);
-  const unit = sub?.units.find((u) => u.id === uid);
+  const unit = findLeafUnit(sub, uid);
   const all = unit?.questions || [];
   const excluded = new Set((window.OX_EXCLUDED_PACK_NOS || []).map(Number));
   const wrongKeys = getWrongKeysForUnit(uid);
@@ -594,7 +686,8 @@ function retry() {
 }
 
 function bind() {
-  ui.subjectSelect.addEventListener("change", fillUnits);
+  ui.subjectSelect.addEventListener("change", fillPickerUnits);
+  if (ui.majorSelect) ui.majorSelect.addEventListener("change", fillMinorUnits);
   ui.startBtn.addEventListener("click", start);
   if (ui.wrongReviewBtn) ui.wrongReviewBtn.addEventListener("click", startWrongReview);
   if (ui.removeWrongBtn) ui.removeWrongBtn.addEventListener("click", removeCurrentFromWrongList);
@@ -627,7 +720,7 @@ async function boot() {
   const fallback = window.OX_CURRICULUM || [];
   curriculum = fallback;
   fillSubjects();
-  fillUnits();
+  fillPickerUnits();
 
   if (USE_LOCAL_ONLY) return;
 
@@ -643,7 +736,7 @@ async function boot() {
     if (fromDb && fromDb.length) {
       curriculum = fromDb;
       fillSubjects();
-      fillUnits();
+      fillPickerUnits();
     }
   } catch (e) {
     console.warn("Supabase 로드 실패, 로컬 data.js 사용:", e);

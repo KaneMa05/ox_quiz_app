@@ -133,6 +133,7 @@ def main() -> None:
         "alter table public.quiz_questions add column if not exists pack_no int;",
         "alter table public.quiz_questions add column if not exists question text;",
         "alter table public.quiz_questions add column if not exists choice_text text;",
+        "alter table public.quiz_units add column if not exists parent_unit_id uuid references public.quiz_units(id) on delete cascade;",
         "",
         "create table if not exists public.quiz_settings (",
         "  key text primary key,",
@@ -151,7 +152,7 @@ def main() -> None:
         "  uid uuid;",
         "begin",
         "  insert into public.quiz_subjects (name, sort_order) values ('해사법규', 0) returning id into sid;",
-        "  insert into public.quiz_units (subject_id, name, sort_order) values (sid, '수상레저안전법', 0) returning id into uid;",
+        "  insert into public.quiz_units (subject_id, parent_unit_id, name, sort_order) values (sid, null, '수상레저안전법', 0) returning id into uid;",
     ]
     for ord_i, (pack, stem, statement, body, answer, explanation) in enumerate(rows):
         q_esc = esc_sql(stem)

@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>공시생 OX 퀴즈</title>
+    <title>유또미의 OX 퀴즈</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="app">
       <header class="top">
         <div class="topRow">
-          <h1>OX 퀴즈</h1>
+          <h1>유또미의 OX 퀴즈</h1>
           <button id="homeBtn" class="btn-icon-home hidden" type="button" aria-label="처음으로" title="처음으로">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5Z" />
@@ -20,10 +20,20 @@
       </header>
 
       <section class="card" id="pickCard">
-        <label class="label" for="subjectSelect">과목</label>
-        <select id="subjectSelect" class="select"></select>
-        <label class="label" for="unitSelect">단원</label>
-        <select id="unitSelect" class="select"></select>
+        <div class="pickBlock pickBlock--subject">
+          <label class="label" for="subjectSelect">과목</label>
+          <select id="subjectSelect" class="select"></select>
+        </div>
+        <div id="pickTierWrap" class="pickTierWrap hidden" aria-hidden="true">
+          <div id="majorUnitRow" class="majorUnitRow">
+            <label class="label" for="majorSelect">대단원</label>
+            <select id="majorSelect" class="select"></select>
+          </div>
+        </div>
+        <div class="pickUnitRow" id="pickUnitRow">
+          <label class="label" for="unitSelect" id="minorLabel">단원</label>
+          <select id="unitSelect" class="select"></select>
+        </div>
         <button id="startBtn" class="btn btn-start" type="button">시작</button>
         <button id="wrongReviewBtn" class="btn btn-wrong-review" type="button">오답 모아보기</button>
         <p class="pickFootnote" role="note">2번 이상 맞춘 문제는 이후 출제에 나오지 않습니다.</p>

@@ -5,9 +5,54 @@
 ## 1. Supabase (DB)
 
 1. [Supabase](https://supabase.com)에서 새 프로젝트 생성.
-2. **SQL Editor**에서 `supabase/schema.sql` 전체를 실행한 뒤, 같은 곳에서 `supabase/seed_water_leisure.sql` 전체를 실행합니다. (문제 본문은 `data.js`와 동일하고, 맨 아래 `quiz_settings`에 출제 제외 `pack_no` 목록이 들어갑니다.)
+2. **SQL Editor**에서 `supabase/schema.sql` 전체를 실행한 뒤, 같은 곳에서 `supabase/seed_water_leisure.sql` 전체를 실행합니다. (문제 본문은 `data.js`와 동일하고, 맨 아래 `quiz_settings`에 출제 제외 `pack_no` 목록이 들어갑니다.)  
+   예전 DB에는 `supabase/add_parent_unit_id.sql`을 한 번 실행해 `quiz_units.parent_unit_id`(대단원·소단원) 컬럼이 있는지 확인하세요. `null`이면 대단원(또는 단일 단원), 값이 있으면 그 id를 부모로 하는 소단원입니다. 문제(`quiz_questions`)는 **소단원(말단 단원)** id에만 연결합니다.
 3. 예전에 `schema.sql`만 돌린 DB라면 `supabase/add_quiz_settings.sql`을 한 번 실행한 뒤, `seed_water_leisure.sql` 맨 아래 `insert ... quiz_settings` 한 줄만 실행해도 됩니다.
 4. **Settings → API**에서 `Project URL`, `anon public` 키를 복사해 둡니다.
+
+### Supabase에 접속해서 데이터를 넣는 방법
+
+1. **로그인·프로젝트**  
+   [supabase.com](https://supabase.com)에 로그인 → 상단에서 **본인의 OX 퀴즈 프로젝트**를 선택합니다.
+
+2. **SQL로 한 번에 넣기 (권장)**  
+   왼쪽 메뉴 **SQL Editor** → **New query** → 이 저장소의 `supabase/schema.sql`(최초 1회), `add_parent_unit_id.sql`·`add_quiz_settings.sql` 등 필요한 것만 순서대로 실행한 뒤, `seed_water_leisure.sql`처럼 준비된 시드 전체를 붙여넣고 **Run** 합니다.  
+   개별 문항만 넣을 때는 `INSERT INTO public.quiz_subjects ...` 형태의 SQL을 작성해 같은 SQL Editor에서 실행하면 됩니다. (문자열 안의 작은따옴표 `'`는 SQL에서 `''`로 이스케이프합니다.)
+
+3. **화면에서 한 줄씩 넣기**  
+   **Table Editor** → `quiz_subjects`, `quiz_units`, `quiz_questions` 등 테이블을 고른 뒤 **Insert** / 행 추가로 값을 입력합니다. `id`는 비워 두면 UUID가 자동 생성되는 경우가 많습니다.  
+   **대단원·소단원**: `quiz_units`에서 소단원 행의 `parent_unit_id`에 대단원 행의 `id`를 넣습니다. `quiz_questions.unit_id`는 **소단원(말단)** id만 가리킵니다.
+
+4. **외부 클라이언트로 접속**  
+   **Project Settings → Database**에서 **Connection string**(URI)을 복사해, PC에 설치한 [DBeaver](https://dbeaver.io/), [TablePlus](https://tableplus.com/), `psql` 등으로 접속해 동일하게 `INSERT`·`SELECT`를 실행할 수도 있습니다.
+
+5. **주의**  
+   `seed_water_leisure.sql` 맨 위의 `truncate ... cascade`는 **기존 과목·단원·문제를 비웁니다.** 이미 넣은 데이터를 지우고 싶지 않다면 시드 전체 대신 **필요한 `INSERT`만** 따로 실행하세요.
+
+### data.js를 Supabase에 자동 반영 (`npm run db:sync`)
+
+1. **Supabase Dashboard → Settings → API**에서 **Project URL**과 **service_role** 시크릿 키를 복사합니다. (`anon` 키가 아닙니다.)
+2. `ox-quiz-app` 루트에 `.env.local`(또는 `.env`)을 만들고 다음을 넣습니다.  
+   `SUPABASE_URL=...`  
+   `SUPABASE_SERVICE_ROLE_KEY=...`  
+   **service_role 키는 RLS를 우회합니다. Git에 커밋하거나 Vercel 환경 변수(브라우저에 노출되는 값)에 넣지 마세요.**
+3. 터미널에서:
+   ```bash
+   cd ox-quiz-app
+   npm install
+   npm run db:sync
+   ```
+4. 스크립트는 **동기화 대상 과목**과 **같은 이름**의 `quiz_subjects` 행을 삭제한 뒤(연쇄로 단원·문항 삭제), `data.js` 내용으로 다시 채웁니다. `quiz_settings`의 `excluded_pack_nos`도 `data.js`와 맞춥니다.
+5. **일부 과목만** 넣거나 갱신하려면 같은 파일에  
+   `OX_DB_SYNC_SUBJECTS=해양경찰학개론`  
+   처럼 **과목 표시명**을 쉼표로 구분해 넣습니다. 비우거나 `all`이면 `data.js`에 있는 **모든** 과목을 대상으로 합니다(해사법규 분량이 많으면 시간이 걸릴 수 있습니다).
+
+### Cursor Supabase MCP (`execute_sql`)
+
+Cursor에 **Supabase MCP**가 연결되어 있으면, 채팅 중 에이전트가 **`execute_sql`**로 Postgres에 SQL을 실행할 수 있습니다(대시보드 SQL Editor와 유사). 스키마 변경은 MCP의 **`apply_migration`** 사용이 권장됩니다.
+
+- MCP는 **MCP 설정에 연결된 프로젝트**에만 적용됩니다.
+- `DELETE`·`INSERT` 등은 Cursor에서 도구 승인 시 실행되므로, **대량·전체 동기화**는 여전히 **`npm run db:sync`**가 안정적입니다. MCP는 소량 수정·점검용 `SELECT`·짧은 DML에 적합합니다.
 
 ## 2. Vercel (배포)
 

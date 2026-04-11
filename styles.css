@@ -1,11 +1,26 @@
 :root {
-  --bg: #0f172a;
-  --card: #111827;
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-  --ok: #22c55e;
-  --no: #ef4444;
-  --accent: #3b82f6;
+  /* 바탕 = #c4bee2, 밝은 테마 */
+  --tint: #c4bee2;
+  --bg: #c4bee2;
+  --bg-top: color-mix(in oklab, var(--tint), white 22%);
+  --card: #fdfcff;
+  --text: #26243d;
+  --muted: #5c5678;
+  --border: color-mix(in oklab, #433d6b, transparent 82%);
+  --border-strong: color-mix(in oklab, #433d6b, transparent 68%);
+  --surface: #ffffff;
+  --surface-muted: color-mix(in oklab, #ffffff, var(--tint) 28%);
+  --surface-raised: color-mix(in oklab, var(--card), var(--tint) 35%);
+  --ok: #0d8f56;
+  --no: #d63d3d;
+  --accent: #514a8a;
+  --on-accent: #ffffff;
+  /* 시작 버튼 면 = 바탕 틴트와 동일 (#c4bee2) */
+  --on-start: #35324f;
+  /* 오답 모아보기: 더 진한 면 */
+  --wrong-review-bg: color-mix(in oklab, var(--accent), black 14%);
+  --wrong-review-border: color-mix(in oklab, var(--accent), black 4%);
+  --on-wrong-review: #f7f6ff;
 }
 
 * {
@@ -15,8 +30,11 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-  background: linear-gradient(180deg, #0b1220, var(--bg));
+  background: linear-gradient(180deg, var(--bg-top), var(--bg));
+  background-color: var(--bg);
   color: var(--text);
+  color-scheme: light;
+  min-height: 100dvh;
 }
 
 .app {
@@ -43,6 +61,7 @@ body {
   line-height: 1.2;
   flex: 1;
   min-width: 0;
+  color: var(--text);
 }
 
 .btn-icon-home {
@@ -53,17 +72,17 @@ body {
   width: 36px;
   height: 36px;
   padding: 0;
-  border: 1px solid #334155;
+  border: 1px solid var(--border-strong);
   border-radius: 10px;
-  background: color-mix(in oklab, #0b1220, transparent 20%);
+  background: color-mix(in oklab, var(--surface), transparent 12%);
   color: var(--muted);
   cursor: pointer;
 }
 
 .btn-icon-home:hover {
-  color: var(--text);
-  border-color: #475569;
-  background: #1e293b;
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--surface);
 }
 
 .btn-icon-home svg {
@@ -77,45 +96,91 @@ body {
   color: var(--muted);
 }
 
+.pickBlock--subject {
+  padding-bottom: 14px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pickBlock--subject .label:first-child {
+  margin-top: 0;
+}
+
+.pickTierWrap {
+  margin-top: 12px;
+}
+
+.pickTierWrap.hidden {
+  display: none;
+}
+
+.pickTierWrap .majorUnitRow .label:first-of-type {
+  margin-top: 0;
+}
+
+.pickUnitRow {
+  margin-top: 12px;
+}
+
+.pickUnitRow .label:first-child {
+  margin-top: 0;
+}
+
+.pickUnitRow:not(.pickUnitRow--minor) .label:first-child {
+  margin-top: 8px;
+}
+
+.majorUnitRow .label:first-of-type {
+  margin-top: 0;
+}
+
 .select {
   width: 100%;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid #243042;
-  background: #0b1220;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
   color: var(--text);
   font-size: 16px;
 }
 
-.btn-start {
+.btn.btn-start {
   width: 100%;
   margin-top: 14px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--tint);
+  color: var(--on-start);
+  border: 1px solid color-mix(in oklab, var(--accent), transparent 35%);
+  box-shadow: 0 1px 0 color-mix(in oklab, #fff, transparent 55%);
 }
 
-.btn-wrong-review {
+.btn.btn-start:hover {
+  filter: brightness(0.97);
+  border-color: color-mix(in oklab, var(--accent), transparent 22%);
+}
+
+.btn.btn-wrong-review {
   width: 100%;
   margin-top: 10px;
   padding: 12px 10px;
   border-radius: 12px;
-  border: 1px solid #334155;
-  background: #111c2e;
-  color: #e2e8f0;
+  border: 1px solid var(--wrong-review-border);
+  background: var(--wrong-review-bg);
+  color: var(--on-wrong-review);
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
 }
 
-.btn-wrong-review:hover {
-  border-color: #475569;
-  background: #1e293b;
+.btn.btn-wrong-review:hover {
+  border-color: color-mix(in oklab, var(--wrong-review-border), black 12%);
+  background: color-mix(in oklab, var(--wrong-review-bg), black 10%);
+  color: #fff;
 }
 
 .pickFootnote {
   margin: 16px 0 0;
   padding-top: 14px;
-  border-top: 1px solid #243042;
+  border-top: 1px solid var(--border);
   font-size: 12px;
   line-height: 1.5;
   color: var(--muted);
@@ -127,7 +192,7 @@ body {
   margin-top: 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #334155;
+  border: 1px solid var(--border);
   background: transparent;
   color: var(--muted);
   font-size: 13px;
@@ -136,9 +201,9 @@ body {
 }
 
 .btn-reset:hover {
-  color: var(--text);
-  border-color: #475569;
-  background: color-mix(in oklab, #0b1220, transparent 30%);
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--surface), transparent 35%);
 }
 
 .modal {
@@ -158,7 +223,7 @@ body {
 .modalBackdrop {
   position: absolute;
   inset: 0;
-  background: rgba(2, 6, 23, 0.72);
+  background: rgba(55, 48, 95, 0.38);
 }
 
 .modalPanel {
@@ -173,6 +238,7 @@ body {
   margin: 0 0 10px;
   font-size: 17px;
   font-weight: 800;
+  color: var(--text);
 }
 
 .modalBody {
@@ -198,20 +264,22 @@ body {
 }
 
 .btn-modal-secondary {
-  background: #334155;
-  color: #e5e7eb;
+  background: var(--surface-muted);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
 }
 
 .btn-modal-danger {
-  background: #b45309;
+  background: #c2410c;
   color: #fff;
 }
 
 .card {
-  background: color-mix(in oklab, var(--card), black 10%);
-  border: 1px solid #243042;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 14px;
+  box-shadow: 0 8px 28px color-mix(in oklab, #2a2550, transparent 92%);
 }
 
 .card-quiz {
@@ -241,7 +309,7 @@ body {
 .quizModeBadge {
   font-size: 11px;
   font-weight: 800;
-  color: #fbbf24;
+  color: var(--accent);
   letter-spacing: 0.03em;
 }
 
@@ -250,14 +318,15 @@ body {
   font-size: 19px;
   line-height: 1.45;
   font-weight: 700;
+  color: var(--text);
 }
 
 .qaBox {
   margin-top: 10px;
-  border: 1px solid #2a3a52;
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px 12px;
-  background: color-mix(in oklab, #0b1220, var(--card) 30%);
+  background: var(--surface-muted);
 }
 
 .qaLabel {
@@ -271,12 +340,14 @@ body {
   font-size: 17px;
   line-height: 1.5;
   font-weight: 600;
+  color: var(--text);
 }
 
 .hint {
   min-height: 24px;
   margin-bottom: 12px;
   font-size: 14px;
+  color: var(--muted);
 }
 
 .actions {
@@ -308,6 +379,7 @@ body {
 
 .btn-retry {
   background: var(--accent);
+  color: var(--on-accent);
   width: 100%;
   margin-top: 10px;
 }
@@ -317,17 +389,17 @@ body {
   margin: 12px 0 0;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #7f1d1d;
+  border: 1px solid color-mix(in oklab, var(--no), transparent 35%);
   background: transparent;
-  color: #fca5a5;
+  color: #b91c1c;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
 }
 
 .btn-remove-wrong:hover {
-  background: color-mix(in oklab, #7f1d1d, transparent 85%);
-  color: #fecaca;
+  background: color-mix(in oklab, var(--no), transparent 88%);
+  color: #991b1b;
 }
 
 .btn-remove-wrong.hidden {
@@ -337,7 +409,9 @@ body {
 .btn-confirm {
   width: 100%;
   margin-top: 10px;
-  background: #334155;
+  background: var(--surface-muted);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
 }
 
 .btn-confirm:disabled {
@@ -347,6 +421,7 @@ body {
 .result {
   font-size: 18px;
   font-weight: 700;
+  color: var(--text);
 }
 
 .hidden {

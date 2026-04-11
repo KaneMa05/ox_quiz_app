@@ -1,0 +1,7 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+
+tools/_tmp_mdp_sync.sql
+tools/_verify_out.txt

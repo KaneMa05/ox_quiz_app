@@ -12,6 +12,8 @@ create table if not exists public.quiz_subjects (
 create table if not exists public.quiz_units (
   id uuid primary key default gen_random_uuid(),
   subject_id uuid not null references public.quiz_subjects (id) on delete cascade,
+  -- null: 대단원 또는 단일 단원. 값 있으면 소단원(부모=대단원 id)
+  parent_unit_id uuid references public.quiz_units (id) on delete cascade,
   name text not null,
   sort_order int not null default 0,
   is_active boolean not null default true,
@@ -33,11 +35,14 @@ create table if not exists public.quiz_questions (
 );
 
 create index if not exists idx_quiz_units_subject on public.quiz_units (subject_id);
+create index if not exists idx_quiz_units_parent on public.quiz_units (parent_unit_id);
 create index if not exists idx_quiz_questions_unit on public.quiz_questions (unit_id);
 
 -- 기존 DB(예전 body만 있던 테이블): 컬럼 추가
 alter table public.quiz_questions add column if not exists question text;
 alter table public.quiz_questions add column if not exists choice_text text;
+
+alter table public.quiz_units add column if not exists parent_unit_id uuid references public.quiz_units (id) on delete cascade;
 
 -- 앱 설정(anon 읽기 전용). 예: 출제에서 제외할 pack_no 목록 JSON 배열
 create table if not exists public.quiz_settings (
