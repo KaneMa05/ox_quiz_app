@@ -5,6 +5,8 @@ const ui = {
   subjectSelect: document.getElementById("subjectSelect"),
   unitSelect: document.getElementById("unitSelect"),
   startBtn: document.getElementById("startBtn"),
+  wrongReviewBtn: document.getElementById("wrongReviewBtn"),
+  quizModeBadge: document.getElementById("quizModeBadge"),
   resetMasteredBtn: document.getElementById("resetMasteredBtn"),
   resetModal: document.getElementById("resetModal"),
   resetModalCancel: document.getElementById("resetModalCancel"),
@@ -17,6 +19,7 @@ const ui = {
   btnO: document.getElementById("btnO"),
   btnX: document.getElementById("btnX"),
   confirmBtn: document.getElementById("confirmBtn"),
+  removeWrongBtn: document.getElementById("removeWrongBtn"),
   homeBtn: document.getElementById("homeBtn"),
   finalScore: document.getElementById("finalScore"),
   retryBtn: document.getElementById("retryBtn"),
@@ -32,9 +35,12 @@ let quizSession = [];
 let idx = 0;
 let score = 0;
 let answeredCurrent = false;
+/** true: 선택 단원의 저장된 오답만 출제 */
+let wrongReviewMode = false;
 /** false: `/api/env?format=json`로 키를 읽고 Supabase에서 과목·단원·문제를 불러옴. 실패 시 data.js 유지 */
 const USE_LOCAL_ONLY = false;
 const MASTERED_KEY = "ox-mastered-v1";
+const WRONG_KEY = "ox-wrong-v1";
 /** 같은 문항(body)을 이 횟수만큼 맞추면 이후 출제에서 제외 */
 const MASTER_EXCLUDE_AFTER_CORRECT = 2;
 
@@ -118,6 +124,51 @@ function recordCorrect(unitId, question) {
   const next = Math.min(MASTER_EXCLUDE_AFTER_CORRECT, getCorrectCount(unitId, body) + 1);
   map[unitId][body] = next;
   writeMasteredMap(map);
+}
+
+function readWrongMap() {
+  try {
+    const raw = localStorage.getItem(WRONG_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeWrongMap(next) {
+  try {
+    localStorage.setItem(WRONG_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
+}
+
+function addWrong(unitId, question) {
+  const k = questionBodyKey(question);
+  if (!unitId || !k) return;
+  const map = readWrongMap();
+  if (!map[unitId] || typeof map[unitId] !== "object") map[unitId] = {};
+  map[unitId][k] = true;
+  writeWrongMap(map);
+}
+
+function removeWrong(unitId, question) {
+  const k = questionBodyKey(question);
+  if (!unitId || !k) return;
+  const map = readWrongMap();
+  const um = map[unitId];
+  if (!um || typeof um !== "object") return;
+  delete um[k];
+  if (!Object.keys(um).length) delete map[unitId];
+  writeWrongMap(map);
+}
+
+function getWrongKeysForUnit(unitId) {
+  const um = readWrongMap()[unitId];
+  if (!um || typeof um !== "object") return new Set();
+  return new Set(Object.keys(um));
 }
 
 async function loadEnvJson() {
@@ -228,6 +279,8 @@ function fillUnits() {
 }
 
 function showPick() {
+  wrongReviewMode = false;
+  updateQuizModeBadge();
   ui.pickCard.classList.remove("hidden");
   ui.quizCard.classList.add("hidden");
   ui.resultCard.classList.add("hidden");
@@ -259,11 +312,33 @@ function goHome() {
   showPick();
 }
 
+function updateQuizModeBadge() {
+  if (!ui.quizModeBadge) return;
+  if (wrongReviewMode) {
+    ui.quizModeBadge.textContent = "오답 모아보기";
+    ui.quizModeBadge.classList.remove("hidden");
+  } else {
+    ui.quizModeBadge.textContent = "";
+    ui.quizModeBadge.classList.add("hidden");
+  }
+}
+
+function updateRemoveWrongBtnVisibility() {
+  if (!ui.removeWrongBtn) return;
+  if (wrongReviewMode && activeQuestions.length > 0 && idx < activeQuestions.length) {
+    ui.removeWrongBtn.classList.remove("hidden");
+  } else {
+    ui.removeWrongBtn.classList.add("hidden");
+  }
+}
+
 function showQuiz() {
   ui.pickCard.classList.add("hidden");
   ui.quizCard.classList.remove("hidden");
   ui.resultCard.classList.add("hidden");
   if (ui.homeBtn) ui.homeBtn.classList.remove("hidden");
+  updateQuizModeBadge();
+  updateRemoveWrongBtnVisibility();
 }
 
 function parseQuestionParts(q) {
@@ -328,6 +403,7 @@ function renderQuestion() {
     ui.btnO.disabled = true;
     ui.btnX.disabled = true;
     if (ui.confirmBtn) ui.confirmBtn.disabled = false;
+    updateRemoveWrongBtnVisibility();
     return;
   }
   if (slot && !slot.locked) {
@@ -336,6 +412,7 @@ function renderQuestion() {
     ui.btnO.disabled = true;
     ui.btnX.disabled = true;
     if (ui.confirmBtn) ui.confirmBtn.disabled = false;
+    updateRemoveWrongBtnVisibility();
     return;
   }
 
@@ -344,6 +421,7 @@ function renderQuestion() {
   ui.btnO.disabled = false;
   ui.btnX.disabled = false;
   if (ui.confirmBtn) ui.confirmBtn.disabled = true;
+  updateRemoveWrongBtnVisibility();
 }
 
 function finish() {
@@ -361,10 +439,15 @@ function answer(userAnswer) {
   const ok = userAnswer === q.answer;
   const hintText = ok ? `정답. ${q.explanation}` : `오답. ${q.explanation}`;
   quizSession[idx] = { locked: false, userAnswer, ok, hintText };
+  const uid = ui.unitSelect.value;
   if (ok) {
     score += 1;
-    const uid = ui.unitSelect.value;
-    if (uid) recordCorrect(uid, q);
+    if (uid) {
+      recordCorrect(uid, q);
+      removeWrong(uid, q);
+    }
+  } else if (uid) {
+    addWrong(uid, q);
   }
   ui.hint.textContent = hintText;
   answeredCurrent = true;
@@ -387,6 +470,38 @@ function goNext() {
   renderQuestion();
 }
 
+/** 오답 모아보기: 저장된 오답만 지우고(점수·맞춤 기록 불변) 현재 세션에서도 빼기 */
+function removeCurrentFromWrongList() {
+  if (!wrongReviewMode) return;
+  const uid = ui.unitSelect.value;
+  const q = activeQuestions[idx];
+  if (!uid || !q) return;
+  if (
+    !window.confirm(
+      "이 문항을 오답 목록에서만 제거할까요?\n(점수와 2회 맞춤 기록은 바뀌지 않습니다. 지금 세션에서도 건너뜁니다.)"
+    )
+  ) {
+    return;
+  }
+  removeWrong(uid, q);
+  activeQuestions.splice(idx, 1);
+  quizSession.splice(idx, 1);
+  if (!activeQuestions.length) {
+    wrongReviewMode = false;
+    activeQuestions = [];
+    quizSession = [];
+    idx = 0;
+    score = 0;
+    answeredCurrent = false;
+    showPick();
+    window.alert("남은 문항이 없어 처음 화면으로 돌아갑니다.");
+    return;
+  }
+  if (idx >= activeQuestions.length) idx = activeQuestions.length - 1;
+  answeredCurrent = false;
+  renderQuestion();
+}
+
 const SESSION_QUESTION_COUNT = 20;
 
 function shuffleCopy(arr) {
@@ -401,6 +516,7 @@ function shuffleCopy(arr) {
 }
 
 function start() {
+  wrongReviewMode = false;
   const sid = ui.subjectSelect.value;
   const uid = ui.unitSelect.value;
   const sub = curriculum.find((s) => s.id === sid);
@@ -431,17 +547,57 @@ function start() {
   renderQuestion();
 }
 
+function startWrongReview() {
+  const sid = ui.subjectSelect.value;
+  const uid = ui.unitSelect.value;
+  const sub = curriculum.find((s) => s.id === sid);
+  const unit = sub?.units.find((u) => u.id === uid);
+  const all = unit?.questions || [];
+  const excluded = new Set((window.OX_EXCLUDED_PACK_NOS || []).map(Number));
+  const wrongKeys = getWrongKeysForUnit(uid);
+  const list = all.filter((q) => {
+    const k = questionBodyKey(q);
+    if (!k) return false;
+    if (q.packNo != null && excluded.has(Number(q.packNo))) return false;
+    return wrongKeys.has(k);
+  });
+  if (!list.length) {
+    window.alert(
+      wrongReviewMode
+        ? "이 단원에 더 모아볼 오답이 없습니다. (맞춘 문항은 오답 목록에서 빠집니다.)"
+        : "이 단원에 저장된 오답이 없습니다. 일반 퀴즈에서 틀린 문항이 쌓이면 여기서 모아볼 수 있습니다."
+    );
+    wrongReviewMode = false;
+    showPick();
+    return;
+  }
+  wrongReviewMode = true;
+  const take = Math.min(SESSION_QUESTION_COUNT, list.length);
+  activeQuestions = shuffleCopy(list).slice(0, take);
+  quizSession = activeQuestions.map(() => null);
+  idx = 0;
+  score = 0;
+  showQuiz();
+  renderQuestion();
+}
+
 function retry() {
   idx = 0;
   score = 0;
   quizSession = [];
   ui.resultCard.classList.add("hidden");
-  start();
+  if (wrongReviewMode) {
+    startWrongReview();
+  } else {
+    start();
+  }
 }
 
 function bind() {
   ui.subjectSelect.addEventListener("change", fillUnits);
   ui.startBtn.addEventListener("click", start);
+  if (ui.wrongReviewBtn) ui.wrongReviewBtn.addEventListener("click", startWrongReview);
+  if (ui.removeWrongBtn) ui.removeWrongBtn.addEventListener("click", removeCurrentFromWrongList);
   ui.btnO.addEventListener("click", () => answer(true));
   ui.btnX.addEventListener("click", () => answer(false));
   if (ui.confirmBtn) ui.confirmBtn.addEventListener("click", goNext);
