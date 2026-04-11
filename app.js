@@ -5,6 +5,10 @@ const ui = {
   subjectSelect: document.getElementById("subjectSelect"),
   unitSelect: document.getElementById("unitSelect"),
   startBtn: document.getElementById("startBtn"),
+  resetMasteredBtn: document.getElementById("resetMasteredBtn"),
+  resetModal: document.getElementById("resetModal"),
+  resetModalCancel: document.getElementById("resetModalCancel"),
+  resetModalConfirm: document.getElementById("resetModalConfirm"),
   progress: document.getElementById("progress"),
   score: document.getElementById("score"),
   question: document.getElementById("question"),
@@ -17,6 +21,9 @@ const ui = {
   finalScore: document.getElementById("finalScore"),
   retryBtn: document.getElementById("retryBtn"),
 };
+
+/** @type {HTMLElement | null} */
+let resetModalPrevFocus = null;
 
 let curriculum = [];
 let activeQuestions = [];
@@ -47,6 +54,36 @@ function writeMasteredMap(next) {
     localStorage.setItem(MASTERED_KEY, JSON.stringify(next));
   } catch {
     // ignore storage failures
+  }
+}
+
+function clearMasteredMap() {
+  writeMasteredMap({});
+}
+
+function openResetMasteredModal() {
+  if (!ui.resetModal) return;
+  resetModalPrevFocus = /** @type {HTMLElement | null} */ (document.activeElement);
+  ui.resetModal.classList.remove("hidden");
+  ui.resetModal.setAttribute("aria-hidden", "false");
+  if (ui.resetModalConfirm) ui.resetModalConfirm.focus();
+}
+
+function closeResetMasteredModal() {
+  if (!ui.resetModal) return;
+  ui.resetModal.classList.add("hidden");
+  ui.resetModal.setAttribute("aria-hidden", "true");
+  if (resetModalPrevFocus && typeof resetModalPrevFocus.focus === "function") {
+    resetModalPrevFocus.focus();
+  }
+  resetModalPrevFocus = null;
+}
+
+function onResetModalKeydown(ev) {
+  if (!ui.resetModal || ui.resetModal.classList.contains("hidden")) return;
+  if (ev.key === "Escape") {
+    ev.preventDefault();
+    closeResetMasteredModal();
   }
 }
 
@@ -410,6 +447,22 @@ function bind() {
   if (ui.confirmBtn) ui.confirmBtn.addEventListener("click", goNext);
   if (ui.homeBtn) ui.homeBtn.addEventListener("click", goHome);
   ui.retryBtn.addEventListener("click", retry);
+
+  if (ui.resetMasteredBtn) ui.resetMasteredBtn.addEventListener("click", openResetMasteredModal);
+  if (ui.resetModalCancel) ui.resetModalCancel.addEventListener("click", closeResetMasteredModal);
+  if (ui.resetModalConfirm) {
+    ui.resetModalConfirm.addEventListener("click", () => {
+      clearMasteredMap();
+      closeResetMasteredModal();
+    });
+  }
+  if (ui.resetModal) {
+    ui.resetModal.addEventListener("click", (ev) => {
+      const t = /** @type {HTMLElement} */ (ev.target);
+      if (t?.dataset?.modalDismiss === "true") closeResetMasteredModal();
+    });
+  }
+  document.addEventListener("keydown", onResetModalKeydown);
 }
 
 async function boot() {
