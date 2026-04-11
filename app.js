@@ -28,6 +28,7 @@ const ui = {
   homeBtn: document.getElementById("homeBtn"),
   finalScore: document.getElementById("finalScore"),
   retryBtn: document.getElementById("retryBtn"),
+  dataSourceNote: document.getElementById("dataSourceNote"),
 };
 
 /** @type {HTMLElement | null} */
@@ -44,6 +45,9 @@ let answeredCurrent = false;
 let wrongReviewMode = false;
 /** false: `/api/env?format=json`로 키를 읽고 Supabase에서 과목·단원·문제를 불러옴. 실패 시 data.js 유지 */
 const USE_LOCAL_ONLY = false;
+
+/** "supabase" | "local_js" — 해양경찰학개론 예시는 data.js에 4문항만 있어, 로컬이면 DB 미연결과 동일한 증상이 납니다. */
+let curriculumDataSource = "local_js";
 const MASTERED_KEY = "ox-mastered-v1";
 const WRONG_KEY = "ox-wrong-v1";
 /** 같은 문항(body)을 이 횟수만큼 맞추면 이후 출제에서 제외 */
@@ -198,6 +202,12 @@ function eqUuid(a, b) {
   return a != null && b != null && String(a).toLowerCase() === String(b).toLowerCase();
 }
 
+/** parent_unit_id → 소단원 목록 Map 키용(PostgREST·select value 간 대소문자 차이 방지) */
+function uuidMapKey(v) {
+  if (v == null || v === "") return "";
+  return String(v).toLowerCase();
+}
+
 function mapQuestionRowFromDb(q) {
   return {
     packNo: q.pack_no != null ? Number(q.pack_no) : null,
@@ -220,7 +230,7 @@ function buildCurriculumFromRows(subjects, units, questions) {
   const qs = (questions || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   return subs.map((s) => {
-    const sunits = uns.filter((u) => u.subject_id === s.id);
+    const sunits = uns.filter((u) => eqUuid(u.subject_id, s.id));
     const hasHierarchy = sunits.some((u) => u.parent_unit_id);
 
     if (!hasHierarchy) {
@@ -242,7 +252,7 @@ function buildCurriculumFromRows(subjects, units, questions) {
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
     const minorsByParent = new Map();
     for (const u of sunits.filter((x) => x.parent_unit_id)) {
-      const pid = u.parent_unit_id;
+      const pid = uuidMapKey(u.parent_unit_id);
       if (!minorsByParent.has(pid)) minorsByParent.set(pid, []);
       minorsByParent.get(pid).push(u);
     }
@@ -253,7 +263,7 @@ function buildCurriculumFromRows(subjects, units, questions) {
       units: majors.map((ma) => ({
         id: ma.id,
         name: ma.name,
-        children: (minorsByParent.get(ma.id) || [])
+        children: (minorsByParent.get(uuidMapKey(ma.id)) || [])
           .slice()
           .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
           .map((mi) => ({
@@ -278,12 +288,12 @@ function findLeafUnit(sub, leafId) {
   if (!sub?.units || !leafId) return null;
   if (subjectHasTieredUnits(sub)) {
     for (const m of sub.units) {
-      const c = m.children?.find((x) => x.id === leafId);
+      const c = m.children?.find((x) => eqUuid(x.id, leafId));
       if (c) return c;
     }
     return null;
   }
-  return sub.units.find((u) => u.id === leafId) || null;
+  return sub.units.find((u) => eqUuid(u.id, leafId)) || null;
 }
 
 async function loadCurriculumFromSupabase(env) {
@@ -334,10 +344,10 @@ function fillSubjects() {
 
 function fillMinorUnits() {
   const sid = ui.subjectSelect.value;
-  const sub = curriculum.find((s) => s.id === sid);
+  const sub = curriculum.find((s) => eqUuid(s.id, sid));
   if (!sub || !subjectHasTieredUnits(sub) || !ui.majorSelect) return;
   const mid = ui.majorSelect.value;
-  const major = sub.units.find((u) => u.id === mid);
+  const major = sub.units.find((u) => eqUuid(u.id, mid));
   const children = major?.children || [];
   ui.unitSelect.innerHTML = "";
   for (const c of children) {
@@ -350,7 +360,7 @@ function fillMinorUnits() {
 
 function fillPickerUnits() {
   const sid = ui.subjectSelect.value;
-  const sub = curriculum.find((s) => s.id === sid);
+  const sub = curriculum.find((s) => eqUuid(s.id, sid));
   if (!sub) return;
   const tiered = subjectHasTieredUnits(sub);
   if (ui.pickTierWrap) {
@@ -620,7 +630,7 @@ function start() {
   wrongReviewMode = false;
   const sid = ui.subjectSelect.value;
   const uid = ui.unitSelect.value;
-  const sub = curriculum.find((s) => s.id === sid);
+  const sub = curriculum.find((s) => eqUuid(s.id, sid));
   const unit = findLeafUnit(sub, uid);
   const all = unit?.questions || [];
   const excluded = new Set((window.OX_EXCLUDED_PACK_NOS || []).map(Number));
@@ -670,7 +680,7 @@ function start() {
 function startWrongReview() {
   const sid = ui.subjectSelect.value;
   const uid = ui.unitSelect.value;
-  const sub = curriculum.find((s) => s.id === sid);
+  const sub = curriculum.find((s) => eqUuid(s.id, sid));
   const unit = findLeafUnit(sub, uid);
   const all = unit?.questions || [];
   const excluded = new Set((window.OX_EXCLUDED_PACK_NOS || []).map(Number));
@@ -742,33 +752,71 @@ function bind() {
   document.addEventListener("keydown", onResetModalKeydown);
 }
 
+function renderDataSourceNote() {
+  const el = ui.dataSourceNote;
+  if (!el) return;
+  if (USE_LOCAL_ONLY) {
+    el.classList.remove("hidden");
+    el.textContent = "로컬 전용 모드: data.js에 들어 있는 문항만 사용합니다.";
+    return;
+  }
+  if (curriculumDataSource === "supabase") {
+    el.classList.add("hidden");
+    el.textContent = "";
+    return;
+  }
+  el.classList.remove("hidden");
+  el.textContent =
+    "지금은 Supabase DB가 아니라 내장 data.js 예시만 쓰고 있습니다. (해양경찰학개론·역사 단원은 예시가 4문항뿐입니다.) " +
+    "Vercel(또는 호스트) 환경 변수에 SUPABASE_ANON_KEY와 SUPABASE_URL(또는 SUPABASE_PROJECT_ID)을 넣고, " +
+    "/api/env?format=json 이 이 값을 반환하는지 확인한 뒤 새로고침하세요.";
+}
+
 async function boot() {
   bind();
 
+  curriculumDataSource = "local_js";
   const fallback = window.OX_CURRICULUM || [];
   curriculum = fallback;
   fillSubjects();
   fillPickerUnits();
 
-  if (USE_LOCAL_ONLY) return;
+  if (USE_LOCAL_ONLY) {
+    renderDataSourceNote();
+    return;
+  }
 
   const env = await loadEnvJson();
   const hasKeys = Boolean(
     (env.SUPABASE_ANON_KEY || "").trim() && (supabaseUrlFromEnv(env) || "").trim()
   );
 
-  if (!hasKeys) return;
+  if (!hasKeys) {
+    console.warn("OX: /api/env 에 Supabase URL·anon 키가 없어 data.js 로 폴백합니다.");
+    renderDataSourceNote();
+    return;
+  }
+
+  if (!window.supabase?.createClient) {
+    console.warn("OX: supabase-js 스크립트가 없어 data.js 로 폴백합니다.");
+    renderDataSourceNote();
+    return;
+  }
 
   try {
     const fromDb = await loadCurriculumFromSupabase(env);
     if (fromDb && fromDb.length) {
       curriculum = fromDb;
+      curriculumDataSource = "supabase";
       fillSubjects();
       fillPickerUnits();
+    } else {
+      console.warn("OX: Supabase에서 과목이 0개라 data.js 로 폴백합니다.", fromDb);
     }
   } catch (e) {
     console.warn("Supabase 로드 실패, 로컬 data.js 사용:", e);
   }
+  renderDataSourceNote();
 }
 
 boot();

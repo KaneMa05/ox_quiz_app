@@ -183,6 +183,22 @@ body {
   color: #fff;
 }
 
+.pickSourceNote {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in oklab, var(--accent, #c45c26), transparent 55%);
+  background: color-mix(in oklab, var(--accent, #c45c26), transparent 92%);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text, #1a1a1a);
+  text-align: left;
+}
+
+.pickSourceNote.hidden {
+  display: none;
+}
+
 .pickFootnote {
   margin: 16px 0 0;
   padding-top: 14px;

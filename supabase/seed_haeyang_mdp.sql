@@ -1,4 +1,8 @@
 -- 해양경찰학개론: 과목 1행 + 대단원/소단원(quiz_units 5행) + 문항 4개.
+-- 「해양경찰의 역사」소단원 UUID(= quiz_questions.unit_id 로 써야 하는 값):
+--   a3418c9f-0641-5cf6-b4fe-39ae5cfb50b0
+-- 부모 대단원 「해양경찰의 개념」: 1288da96-5777-5457-9f4b-889c36adca69
+-- 과목 행 id: 4767fbe6-ca22-5df3-8aa2-fb8abc795de3
 -- Supabase Dashboard → SQL Editor → 전체 선택 후 Run.
 -- 동일 이름 과목이 있으면 맨 위 DELETE로 지운 뒤 다시 넣습니다(해사법규 등 다른 과목은 건드리지 않음).
 -- 자동 반영은 로컬에서: ox-quiz-app/.env.local 에 SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 후 npm run db:sync (OX_DB_SYNC_SUBJECTS=해양경찰학개론)
