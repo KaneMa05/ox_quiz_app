@@ -144,8 +144,20 @@ body {
   font-size: 16px;
 }
 
-.btn.btn-start {
+/* 메인 카드 주요 버튼: 동일 높이·글자 크기 */
+.btn.btn-start,
+.btn.btn-wrong-review {
   width: 100%;
+  padding: 14px 10px;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  border-radius: 12px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.btn.btn-start {
   margin-top: 14px;
   background: var(--tint);
   color: var(--on-start);
@@ -159,16 +171,10 @@ body {
 }
 
 .btn.btn-wrong-review {
-  width: 100%;
   margin-top: 10px;
-  padding: 12px 10px;
-  border-radius: 12px;
   border: 1px solid var(--wrong-review-border);
   background: var(--wrong-review-bg);
   color: var(--on-wrong-review);
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
 }
 
 .btn.btn-wrong-review:hover {
