@@ -38,6 +38,9 @@
 5. **Git 푸시 대상**  
    Vercel이 연결한 **브랜치**(보통 `main`)에 푸시했는지, 다른 브랜치·다른 원격만 갱신하지 않았는지 확인합니다.
 
+6. **올바른 GitHub 저장소**  
+   OX 전용 저장소는 **[KaneMa05/ox_quiz_app](https://github.com/KaneMa05/ox_quiz_app)** 입니다. 상위 monorepo(다른 `origin`)의 `ox-quiz-app` 폴더만 작업했다면, 여기로 반영되지 않을 수 있습니다. monorepo에서 동기화하려면 `git remote add ox https://github.com/KaneMa05/ox_quiz_app.git` 후 `git subtree push --prefix=ox-quiz-app ox main` 등을 사용합니다(히스토리가 다르면 `--force`가 필요할 수 있음).
+
 ## 3. 동작 방식
 
 - 브라우저가 `/api/env?format=json`으로 키를 읽고, Supabase에서 `quiz_subjects`, `quiz_units`, `quiz_questions`, `quiz_settings`(출제 제외 번호)를 조회합니다.
