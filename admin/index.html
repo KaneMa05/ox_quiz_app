@@ -450,10 +450,26 @@
         return r.json();
       }
 
+      function msgWithSupabaseKeyHint(e, env) {
+        const s = String(e?.message || e?.hint || e);
+        const extra =
+          /apikey|No API key|API key found/i.test(s)
+            ? "\n\n브라우저에서 " + location.origin + "/api/env?format=json 를 열어 SUPABASE_ANON_KEY·SUPABASE_URL 값이 있는지 확인하세요. 비어 있으면 Vercel Production 환경 변수를 넣고 재배포하세요."
+            : "";
+        const hint = env && typeof env.envHint === "string" && env.envHint.trim() ? "\n\n" + env.envHint : "";
+        return s + extra + hint;
+      }
+
       function supabaseFromEnv(env) {
         const url = (env.SUPABASE_URL || "").trim() || (env.SUPABASE_PROJECT_ID ? "https://" + env.SUPABASE_PROJECT_ID + ".supabase.co" : "");
         const key = (env.SUPABASE_ANON_KEY || "").trim();
-        if (!url || !key || !window.supabase) throw new Error("Supabase URL/anon 키 없음");
+        const hint = typeof env.envHint === "string" ? "\n" + env.envHint : "";
+        if (!url || !key || !window.supabase) {
+          throw new Error("Supabase URL 또는 anon 키가 비어 있습니다." + hint);
+        }
+        if (key.length < 20) {
+          throw new Error("anon 키가 너무 짧습니다. Vercel 환경 변수에 Supabase Dashboard의 anon(또는 publishable) 키 전체를 넣었는지 확인하세요." + hint);
+        }
         return window.supabase.createClient(url, key, {
           global: { headers: { apikey: key, Authorization: "Bearer " + key } },
         });
@@ -610,8 +626,9 @@
         listWrap.innerHTML = "";
         const unit_id = unitSelect.value;
         if (!unit_id) return setMsg("단원을 선택하세요.", "err");
+        let env = null;
         try {
-          const env = await loadEnv();
+          env = await loadEnv();
           const client = supabaseFromEnv(env);
           const { data, error } = await client
             .from("quiz_questions")
@@ -672,18 +689,19 @@
           t.appendChild(tb);
           listWrap.appendChild(t);
         } catch (e) {
-          setMsg(String(e.message || e), "err");
+          setMsg(msgWithSupabaseKeyHint(e, env), "err");
         }
       };
 
       (async () => {
+        let env = null;
         try {
-          const env = await loadEnv();
+          env = await loadEnv();
           const client = supabaseFromEnv(env);
           await fillUnits(client);
           setMsg("단원 목록을 불러왔습니다. 관리 비밀번호 입력 후 추가·삭제하세요.", "ok");
         } catch (e) {
-          setMsg(String(e.message || e), "err");
+          setMsg(msgWithSupabaseKeyHint(e, env), "err");
         }
       })();
     </script>

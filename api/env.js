@@ -29,8 +29,19 @@ export default function handler(req, res) {
       "NEXT_PUBLIC_SUPABASE_PROJECT_ID",
       "VITE_SUPABASE_PROJECT_ID",
     ],
-    SUPABASE_ANON_KEY: ["SUPABASE_ANON_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "VITE_SUPABASE_ANON_KEY"],
-    SUPABASE_URL: ["SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL", "VITE_SUPABASE_URL"],
+    SUPABASE_ANON_KEY: [
+      "SUPABASE_ANON_KEY",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "VITE_SUPABASE_ANON_KEY",
+      // Vercel↔Supabase 연동·신규 키 형식에서 쓰는 이름 (레거시 JWT 비활성화 시 수동 추가 필요할 수 있음)
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY",
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+      "SUPABASE_PUBLISHABLE_KEY",
+      "SUPABASE_PUBLISHABLE_OR_ANON_KEY",
+      "PUBLIC_SUPABASE_ANON_KEY",
+      "REACT_APP_SUPABASE_ANON_KEY",
+    ],
+    SUPABASE_URL: ["SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL", "VITE_SUPABASE_URL", "PUBLIC_SUPABASE_URL"],
   };
 
   const normalize = (value) => {
@@ -67,7 +78,12 @@ export default function handler(req, res) {
   if (format === "json") {
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.end(JSON.stringify(payload));
+    const missingHost = !supabaseUrl && !projectId;
+    const hint =
+      !anonKey || missingHost
+        ? "Vercel Production에 SUPABASE_ANON_KEY(또는 NEXT_PUBLIC_SUPABASE_ANON_KEY·NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY 등)와 SUPABASE_URL 또는 SUPABASE_PROJECT_ID를 넣은 뒤 재배포하세요."
+        : "";
+    res.end(JSON.stringify(hint ? { ...payload, envHint: hint } : payload));
     return;
   }
 

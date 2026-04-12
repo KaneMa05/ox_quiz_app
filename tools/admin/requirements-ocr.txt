@@ -1,4 +1,0 @@
-# Admin OCR tool deps. Install Tesseract + kor on the system (see DEPLOY or Tesseract wiki).
-# Optional: set TESSERACT_CMD to full path of tesseract.exe on Windows.
-Pillow>=10.0.0
-pytesseract>=0.3.10

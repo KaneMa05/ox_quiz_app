@@ -806,9 +806,13 @@ async function boot() {
   }
 
   const env = await loadEnvJson();
+  const anon = (env.SUPABASE_ANON_KEY || "").trim();
   const hasKeys = Boolean(
-    (env.SUPABASE_ANON_KEY || "").trim() && (supabaseUrlFromEnv(env) || "").trim()
+    anon.length >= 20 && (supabaseUrlFromEnv(env) || "").trim()
   );
+  if (env.envHint && typeof env.envHint === "string") {
+    console.warn("OX:", env.envHint);
+  }
 
   if (!hasKeys) {
     console.warn("OX: /api/env 에 Supabase URL·anon 키가 없어 data.js 로 폴백합니다.");

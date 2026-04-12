@@ -1,3 +1,0 @@
-id,subject_id,parent_unit_id,name,sort_order,is_active
-,<SUBJECT_UUID>,,해양경찰의 개념,0,true
-,<SUBJECT_UUID>,<MAJOR_UNIT_UUID>,해양경찰의 역사,0,true

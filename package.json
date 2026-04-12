@@ -2,12 +2,7 @@
   "name": "ox-quiz-app",
   "private": true,
   "type": "module",
-  "scripts": {
-    "db:sync": "node tools/push-curriculum.mjs"
-  },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.1",
-    "dotenv": "^16.4.7",
-    "uuid": "^11.0.5"
+    "@supabase/supabase-js": "^2.49.1"
   }
 }
