@@ -4,6 +4,7 @@
 alter table public.quiz_questions add column if not exists pack_no int;
 alter table public.quiz_questions add column if not exists question text;
 alter table public.quiz_questions add column if not exists choice_text text;
+alter table public.quiz_units add column if not exists parent_unit_id uuid references public.quiz_units(id) on delete cascade;
 
 create table if not exists public.quiz_settings (
   key text primary key,
@@ -22,580 +23,218 @@ declare
   uid uuid;
 begin
   insert into public.quiz_subjects (name, sort_order) values ('해사법규', 0) returning id into sid;
-  insert into public.quiz_units (subject_id, name, sort_order) values (sid, '수상레저안전법', 0) returning id into uid;
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?', '"수상레저활동"은 해상에서만 이루어지는 활동을 말한다.', '문제: 「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?
-
-선지: "수상레저활동"은 해상에서만 이루어지는 활동을 말한다.', false, '해상이 아니라 수상(해수면+내수면)에서의 활동이다.', 0, 3);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?', '"동력수상레저기구"는 추진기관이 부착되어 있거나 수시 부착·분리가 가능한 기구를 말한다.', '문제: 「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?
-
-선지: "동력수상레저기구"는 추진기관이 부착되어 있거나 수시 부착·분리가 가능한 기구를 말한다.', true, '법 제2조 정의에 해당한다.', 1, 3);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?', '"수상"은 해수면·내수면을 말하며, 내수면에는 인공 조성 담수·기수 수류/수면이 포함된다.', '문제: 「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?
-
-선지: "수상"은 해수면·내수면을 말하며, 내수면에는 인공 조성 담수·기수 수류/수면이 포함된다.', true, '법 제2조 정의에 해당한다.', 2, 3);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?', '"래프팅"은 무동력수상레저기구를 이용해 계곡/하천에서 급류·물의 흐름을 타는 활동이다.', '문제: 「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?
-
-선지: "래프팅"은 무동력수상레저기구를 이용해 계곡/하천에서 급류·물의 흐름을 타는 활동이다.', true, '법 제2조 정의에 해당한다.', 3, 3);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?', '동력수상레저기구는 단순히 추진기관이 부착된 기구만 말한다.', '문제: 「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?
-
-선지: 동력수상레저기구는 단순히 추진기관이 부착된 기구만 말한다.', false, '법 제2조는 추진기관이 부착된 경우뿐 아니라, 부착·분리가 수시로 가능한 수상레저기구(대통령령으로 정하는 것)까지 포함한다. ①은 정의를 좁게만 설명한다.', 4, 4);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?', '동력수상레저기구는 5마력 이상 추진기관 부착 기구를 말한다.', '문제: 「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?
-
-선지: 동력수상레저기구는 5마력 이상 추진기관 부착 기구를 말한다.', false, '동력수상레저기구는 출력(마력) 기준으로 정의되지 않는다.', 5, 4);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?', '동력수상레저기구는 10마력 이상 추진기관 부착 기구를 말한다.', '문제: 「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?
-
-선지: 동력수상레저기구는 10마력 이상 추진기관 부착 기구를 말한다.', false, '동력수상레저기구는 출력(마력) 기준으로 정의되지 않는다.', 6, 4);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?', '동력수상레저기구는 추진기관 부착 또는 수시 부착·분리 가능한 기구다.', '문제: 「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?
-
-선지: 동력수상레저기구는 추진기관 부착 또는 수시 부착·분리 가능한 기구다.', true, '「동력수상레저기구」란 추진기관이 부착되어 있거나 추진기관을 부착하거나 분리하는 것이 수시로 가능한 수상레저기구로서 대통령령으로 정하는 것을 말한다. (법 제2조 정의)', 7, 4);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?', '해당 용어는 "수상"이다.', '문제: 하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?
-
-선지: 해당 용어는 "수상"이다.', false, '해당 정의는 내수면이다.', 8, 5);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?', '해당 용어는 "해수면"이다.', '문제: 하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?
-
-선지: 해당 용어는 "해수면"이다.', false, '해수면이 아니라 내수면이다.', 9, 5);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?', '해당 용어는 "내수면"이다.', '문제: 하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?
-
-선지: 해당 용어는 "내수면"이다.', true, '법 제2조 정의에 맞다.', 10, 5);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?', '해당 용어는 "개항면"이다.', '문제: 하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?
-
-선지: 해당 용어는 "개항면"이다.', false, '법 정의 용어가 아니다.', 11, 5);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?', '"수상레저활동"은 수상에서 수상레저기구를 이용해 취미·오락·체육·교육 등을 목적으로 하는 활동이다.', '문제: 「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?
-
-선지: "수상레저활동"은 수상에서 수상레저기구를 이용해 취미·오락·체육·교육 등을 목적으로 하는 활동이다.', true, '법 제2조 정의와 일치한다.', 12, 6);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?', '"수상레저기구"는 수상레저활동에 이용되는 선박/기구로서 대통령령으로 정하는 것이다.', '문제: 「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?
-
-선지: "수상레저기구"는 수상레저활동에 이용되는 선박/기구로서 대통령령으로 정하는 것이다.', true, '법 제2조 정의와 일치한다.', 13, 6);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?', '"수상"에서 내수면은 인공 조성 담수/기수 수류·수면을 제외한다.', '문제: 「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?
-
-선지: "수상"에서 내수면은 인공 조성 담수/기수 수류·수면을 제외한다.', false, '제외가 아니라 포함한다.', 14, 6);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?', '"래프팅"은 무동력수상레저기구를 이용해 계곡/하천에서 급류·물의 흐름을 타는 활동이다.', '문제: 「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?
-
-선지: "래프팅"은 무동력수상레저기구를 이용해 계곡/하천에서 급류·물의 흐름을 타는 활동이다.', true, '법 제2조 정의와 일치한다.', 15, 6);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?', '어선을 이용한 유락행위는 수상레저안전법 적용 가능 사례다.', '문제: 다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?
-
-선지: 어선을 이용한 유락행위는 수상레저안전법 적용 가능 사례다.', true, '적용 배제 사유에 해당하지 않는다.', 16, 8);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?', '낚시어선업 신고 모터보트는 수상레저안전법 적용 사례다.', '문제: 다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?
-
-선지: 낚시어선업 신고 모터보트는 수상레저안전법 적용 사례다.', false, '낚시어선업 관련 행위는 적용 배제다.', 17, 8);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?', '유선사업에 이용되는 오리보트는 수상레저안전법 적용 사례다.', '문제: 다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?
-
-선지: 유선사업에 이용되는 오리보트는 수상레저안전법 적용 사례다.', false, '유·도선 사업 관련 행위는 적용 배제다.', 18, 8);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?', '체육시설업 요트장업 이용 요트는 수상레저안전법 적용 사례다.', '문제: 다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?
-
-선지: 체육시설업 요트장업 이용 요트는 수상레저안전법 적용 사례다.', false, '체육시설업 관련 행위는 적용 배제다.', 19, 8);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?', '동력이 장착된 요트를 조종하려면 요트조종면허가 필요하다.', '문제: 동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?
-
-선지: 동력이 장착된 요트를 조종하려면 요트조종면허가 필요하다.', true, '요트 조종은 면허 대상이다.', 20, 9);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?', '조종면허는 제1급/제2급 일반 + 제1급/제2급 요트로 구분된다.', '문제: 동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?
-
-선지: 조종면허는 제1급/제2급 일반 + 제1급/제2급 요트로 구분된다.', false, '요트조종면허는 1종으로 보며 1·2급 구분이 아니다.', 21, 9);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?', '제2급 일반 취득자가 제1급을 취득하면 제2급 효력은 상실된다.', '문제: 동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?
-
-선지: 제2급 일반 취득자가 제1급을 취득하면 제2급 효력은 상실된다.', true, '해설 취지에 부합한다.', 22, 9);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?', '최대출력 5마력 이상 동력수상레저기구 조종에는 조종면허가 필요하다.', '문제: 동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?
-
-선지: 최대출력 5마력 이상 동력수상레저기구 조종에는 조종면허가 필요하다.', true, '면허 대상 기준에 해당한다.', 23, 9);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?', '특례는 국제경기대회 개회 7일 전부터 대회 기간까지만 적용된다.', '문제: 「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?
-
-선지: 특례는 국제경기대회 개회 7일 전부터 대회 기간까지만 적용된다.', false, '개회 10일 전부터 종료 후 10일까지다.', 24, 10);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?', '특례는 2개국 이상 참여 국제경기대회에 적용된다.', '문제: 「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?
-
-선지: 특례는 2개국 이상 참여 국제경기대회에 적용된다.', true, '적용 요건에 해당한다.', 25, 10);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?', '외국인이 국내 국제경기대회 참가 중 조종하는 경우 특례를 적용한다.', '문제: 「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?
-
-선지: 외국인이 국내 국제경기대회 참가 중 조종하는 경우 특례를 적용한다.', true, '적용 대상 설명에 부합한다.', 26, 10);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?', '외국인 조종면허 특례는 모든 동력수상레저기구에 적용된다.', '문제: 「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?
-
-선지: 외국인 조종면허 특례는 모든 동력수상레저기구에 적용된다.', true, '해설 기준으로 O 처리.', 27, 10);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?', '정신질환자 중 수상레저활동을 할 수 없다고 인정되어 대통령령으로 정하는 자는 결격사유에 해당한다.', '문제: 「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?
-
-선지: 정신질환자 중 수상레저활동을 할 수 없다고 인정되어 대통령령으로 정하는 자는 결격사유에 해당한다.', true, '법상 결격사유에 해당한다.', 28, 13);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?', '만 14세 미만(제1급의 경우 18세 미만)은 모두 결격사유에 해당한다.', '문제: 「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?
-
-선지: 만 14세 미만(제1급의 경우 18세 미만)은 모두 결격사유에 해당한다.', false, '예외적으로 대통령령상 체육 관련 단체 선수 등록자는 취득 가능하다.', 29, 13);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?', '마약·대마 중독자 중 수상레저활동을 할 수 없다고 인정되어 대통령령으로 정하는 자는 결격사유에 해당한다.', '문제: 「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?
-
-선지: 마약·대마 중독자 중 수상레저활동을 할 수 없다고 인정되어 대통령령으로 정하는 자는 결격사유에 해당한다.', true, '법상 결격사유에 해당한다.', 30, 13);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?', '조종면허 취소 후 1년이 지나지 않은 자는 결격사유에 해당한다.', '문제: 「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?
-
-선지: 조종면허 취소 후 1년이 지나지 않은 자는 결격사유에 해당한다.', true, '결격사유 규정에 부합한다.', 31, 13);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?', '조종면허 취소일부터 2년이 지나지 아니한 사람', '문제: 「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?
-
-선지: 조종면허 취소일부터 2년이 지나지 아니한 사람', false, '결격기간은 2년이 아니다.', 32, 14);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?', '마약·향정신성의약품 또는 대마 중독자 중 수상레저활동이 어렵다고 인정되어 대통령령으로 정하는 사람', '문제: 「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?
-
-선지: 마약·향정신성의약품 또는 대마 중독자 중 수상레저활동이 어렵다고 인정되어 대통령령으로 정하는 사람', true, '법상 결격사유에 해당한다.', 33, 14);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?', '14세 미만(제2급의 경우 18세 미만)인 사람', '문제: 「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?
-
-선지: 14세 미만(제2급의 경우 18세 미만)인 사람', false, '제2급 기준 18세 미만이라는 진술이 틀렸다.', 34, 14);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?', '무면허 조종 위반일부터 3년이 지나지 않은 사람', '문제: 「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?
-
-선지: 무면허 조종 위반일부터 3년이 지나지 않은 사람', false, '기간/요건 진술이 맞지 않는다.', 35, 14);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?', '부정행위로 시험 무효 처분을 받은 자는 시험 시행일부터 1년간 응시할 수 없다.', '문제: 동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?
-
-선지: 부정행위로 시험 무효 처분을 받은 자는 시험 시행일부터 1년간 응시할 수 없다.', false, '법 기준은 1년이 아니라 2년이다.', 36, 15);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?', '조종면허가 취소된 날부터 1년이 경과하여야 조종면허 시험 응시가 가능하다.', '문제: 동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?
-
-선지: 조종면허가 취소된 날부터 1년이 경과하여야 조종면허 시험 응시가 가능하다.', true, '면허 취소 후 제한기간 규정 취지에 부합한다.', 37, 15);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?', '정신질환자로서 전문의가 정상적인 수상레저활동이 어렵다고 인정하면 면허를 받을 수 없다.', '문제: 동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?
-
-선지: 정신질환자로서 전문의가 정상적인 수상레저활동이 어렵다고 인정하면 면허를 받을 수 없다.', true, '결격사유 규정과 부합한다.', 38, 15);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?', '무면허 조종자는 위반일부터 1년 경과 후 시험 응시가 가능하다.', '문제: 동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?
-
-선지: 무면허 조종자는 위반일부터 1년 경과 후 시험 응시가 가능하다.', true, '해설 기준으로 맞는 진술이다.', 39, 15);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?', '조종능력이 현저히 부족하다고 인정되는 경우', '문제: 「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?
-
-선지: 조종능력이 현저히 부족하다고 인정되는 경우', true, '실격사유에 해당한다.', 40, 16);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?', '사고 예방 지시 불이행 또는 시험관 지시 없이 1회 이상 인명구조 시험을 진행하지 않은 경우', '문제: 「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?
-
-선지: 사고 예방 지시 불이행 또는 시험관 지시 없이 1회 이상 인명구조 시험을 진행하지 않은 경우', false, '기준은 1회가 아니라 2회 이상이다.', 41, 16);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?', '3회 이상 출발지시에도 출발하지 못하거나 응시자 지시불이행 의사를 밝힌 경우', '문제: 「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?
-
-선지: 3회 이상 출발지시에도 출발하지 못하거나 응시자 지시불이행 의사를 밝힌 경우', true, '실격사유에 해당한다.', 42, 16);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?', '감점 합계가 합격기준에 미달함이 명백한 경우', '문제: 「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?
-
-선지: 감점 합계가 합격기준에 미달함이 명백한 경우', true, '실격사유에 해당한다.', 43, 16);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?', '안전교육용 형광신호탄 2개 이상을 갖춘 경우', '문제: 「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?
-
-선지: 안전교육용 형광신호탄 2개 이상을 갖춘 경우', true, '시험장비 기준에 부합한다.', 44, 17);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?', '수심은 20m든 4m든 비상구조조치 1대 이상이면 된다.', '문제: 「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?
-
-선지: 수심은 20m든 4m든 비상구조조치 1대 이상이면 된다.', false, '비상구조조치 기준은 장비 수량만이 아니라 세부 기준을 충족해야 한다.', 45, 17);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?', '일반조종면허 대상 구간에는 규격에 맞는 시험용 동력수상레저기구 3대 이상을 둔다.', '문제: 「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?
-
-선지: 일반조종면허 대상 구간에는 규격에 맞는 시험용 동력수상레저기구 3대 이상을 둔다.', true, '기준 취지에 부합한다.', 46, 17);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?', '요트조종면허 대상 구간에는 규격에 맞는 시험용 요트 2대 이상을 둔다.', '문제: 「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?
-
-선지: 요트조종면허 대상 구간에는 규격에 맞는 시험용 요트 2대 이상을 둔다.', true, '기준 취지에 부합한다.', 47, 17);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?', '갱신 유예 사유가 없어진 날부터 3개월 이내 갱신 신청해야 한다.', '문제: 동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?
-
-선지: 갱신 유예 사유가 없어진 날부터 3개월 이내 갱신 신청해야 한다.', true, '갱신 규정 취지에 부합한다.', 48, 18);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?', '유예 사유로 정지된 갱신기간 만료 전 단속하면 정지된다.', '문제: 동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?
-
-선지: 유예 사유로 정지된 갱신기간 만료 전 단속하면 정지된다.', true, '갱신 관련 제재 규정 취지에 부합한다.', 49, 18);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?', '유예 사유가 남아있는 동안에도 갱신 가능하고, 사유 해소 전에는 갱신 전 기간 안 갱신할 수 있다.', '문제: 동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?
-
-선지: 유예 사유가 남아있는 동안에도 갱신 가능하고, 사유 해소 전에는 갱신 전 기간 안 갱신할 수 있다.', true, '유예 사유 관련 절차 설명 취지에 부합한다.', 50, 18);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?', '조종면허의 갱신 기간 연기는 한 번만 할 수 있다.', '문제: 동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?
-
-선지: 조종면허의 갱신 기간 연기는 한 번만 할 수 있다.', false, '횟수 제한 규정이 없다.', 51, 18);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?', '기징역·파면·부정한 방법 등으로 면허를 받은 경우 조종면허를 취소해야 한다.', '문제: 「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?
-
-선지: 기징역·파면·부정한 방법 등으로 면허를 받은 경우 조종면허를 취소해야 한다.', true, '면허 취소 사유에 해당한다.', 52, 20);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?', '술에 취한 상태 조종 등 일정 사유가 있으면 조종면허를 취소할 수 있다.', '문제: 「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?
-
-선지: 술에 취한 상태 조종 등 일정 사유가 있으면 조종면허를 취소할 수 있다.', true, '면허 취소 사유에 해당한다.', 53, 20);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?', '조종면허 정지 기간 중 조종 시 조종면허를 취소하여야 한다.', '문제: 「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?
-
-선지: 조종면허 정지 기간 중 조종 시 조종면허를 취소하여야 한다.', true, '취소 사유로 본다.', 54, 20);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?', '조종 중 과실로 사람을 사망하게 하고 재산에 중대한 손해를 입힌 경우 면허를 취소해야 한다.', '문제: 「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?
-
-선지: 조종 중 과실로 사람을 사망하게 하고 재산에 중대한 손해를 입힌 경우 면허를 취소해야 한다.', false, '해설 기준으로는 취소 사유가 아니다.', 55, 20);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허 취소·정지 관련 진술', '거짓이나 그 밖의 부정한 방법으로 조종면허를 받은 경우 조종면허를 취소하여야 한다.', '문제: 「수상레저안전법」상 조종면허 취소·정지 관련 진술
-
-선지: 거짓이나 그 밖의 부정한 방법으로 조종면허를 받은 경우 조종면허를 취소하여야 한다.', true, '법 제17조 등에 따른 필요적 취소 사유에 해당한다.', 56, 22);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허 취소·정지 관련 진술', '조종면허 효력정지 기간에 조종을 한 경우 조종면허를 취소하여야 한다.', '문제: 「수상레저안전법」상 조종면허 취소·정지 관련 진술
-
-선지: 조종면허 효력정지 기간에 조종을 한 경우 조종면허를 취소하여야 한다.', true, '필요적 취소 사유에 해당한다.', 57, 22);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허 취소·정지 관련 진술', '조종면허를 받은 자가 동력수상레저기구를 이용하여 살인·강도 등 해양수산부령으로 정하는 범죄행위를 한 경우, 조종면허를 취소하거나 1년의 범위에서 효력을 정지할 수 있다.', '문제: 「수상레저안전법」상 조종면허 취소·정지 관련 진술
-
-선지: 조종면허를 받은 자가 동력수상레저기구를 이용하여 살인·강도 등 해양수산부령으로 정하는 범죄행위를 한 경우, 조종면허를 취소하거나 1년의 범위에서 효력을 정지할 수 있다.', true, '임의적 취소·정지 사유에 해당한다.', 58, 22);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허 취소·정지 관련 진술', '조종 중 고의 또는 과실로 사람을 사상하거나 타인 재산에 중대한 손해를 입힌 경우, 조종면허를 취소하거나 3년의 범위에서 효력을 정지할 수 있다.', '문제: 「수상레저안전법」상 조종면허 취소·정지 관련 진술
-
-선지: 조종 중 고의 또는 과실로 사람을 사상하거나 타인 재산에 중대한 손해를 입힌 경우, 조종면허를 취소하거나 3년의 범위에서 효력을 정지할 수 있다.', false, '사상·재산 손해의 효력정지 상한은 1년 범위이다(법 제17조).', 59, 22);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '둘 이상의 처분기준이 모두 면허정지(효력정지)인 경우, 각 처분기준 기간을 단순 합산한 기간으로 한다.', '문제: 조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술
-
-선지: 둘 이상의 처분기준이 모두 면허정지(효력정지)인 경우, 각 처분기준 기간을 단순 합산한 기간으로 한다.', false, '합산이 아니라, 합산을 넘지 않는 범위에서 무거운 처분기준에 그 기준의 2분의 1 범위에서 가중하는 방식이다.', 60, 23);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '면허증을 다른 사람에게 빌려주어 조종하게 한 경우, 해양경찰청장은 조종면허를 반드시 취소하여야 한다.', '문제: 조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술
-
-선지: 면허증을 다른 사람에게 빌려주어 조종하게 한 경우, 해양경찰청장은 조종면허를 반드시 취소하여야 한다.', false, '취소 또는 1년 범위 효력정지 등 임의적 처분이다.', 61, 23);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '일반조종면허와 요트조종면허를 모두 소지한 자에게 처분 사유가 생긴 경우, 위반 당시 이용한 기구의 조종에 필요한 면허에 대해서만 취소·정지처분을 하여야 한다.', '문제: 조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술
-
-선지: 일반조종면허와 요트조종면허를 모두 소지한 자에게 처분 사유가 생긴 경우, 위반 당시 이용한 기구의 조종에 필요한 면허에 대해서만 취소·정지처분을 하여야 한다.', true, '복수 면허 시 위반 당시 기구에 해당하는 면허만 처분한다.', 62, 23);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '위반행위가 둘 이상이고 처분기준이 서로 다른 경우, 그중 무거운 처분기준에 따른다.', '문제: 조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술
-
-선지: 위반행위가 둘 이상이고 처분기준이 서로 다른 경우, 그중 무거운 처분기준에 따른다.', true, '행정처분 일반기준에 부합한다.', 63, 23);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '처분 대상자의 소재를 알 수 없어 통지할 수 없을 때, 관할 해양경찰서 게시판에 14일간 공고함으로써 통지에 갈음할 수 있다.', '문제: 조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술
-
-선지: 처분 대상자의 소재를 알 수 없어 통지할 수 없을 때, 관할 해양경찰서 게시판에 14일간 공고함으로써 통지에 갈음할 수 있다.', true, '공고 통지 요건에 해당한다.', 64, 23);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '위반행위 횟수에 따른 행정처분 기준은 최근 1년간 같은 위반으로 처분받은 경우에 적용한다.', '문제: 조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술
-
-선지: 위반행위 횟수에 따른 행정처분 기준은 최근 1년간 같은 위반으로 처분받은 경우에 적용한다.', true, '기준 기간은 최근 1년이다.', 65, 23);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '위반이 사소한 부주의·오류로 인정되면 처분기간의 2분의 1 범위에서 감경할 수 있다.', '문제: 조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술
-
-선지: 위반이 사소한 부주의·오류로 인정되면 처분기간의 2분의 1 범위에서 감경할 수 있다.', true, '참작 감경 규정이 있다.', 66, 23);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 관련 진술', '일반조종면허의 경우 제2급을 취득한 자가 제1급을 취득한 때에는 제2급 조종면허의 효력은 상실된다.', '문제: 「수상레저안전법」 관련 진술
-
-선지: 일반조종면허의 경우 제2급을 취득한 자가 제1급을 취득한 때에는 제2급 조종면허의 효력은 상실된다.', true, '법 제5조 취지.', 67, 25);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 관련 진술', '수상레저활동을 하려는 외국인이 국내에서 개최되는 국제경기대회에 참가하여 수상레저기구를 조종하는 경우에는 조종면허가 없어도 된다.', '문제: 「수상레저안전법」 관련 진술
-
-선지: 수상레저활동을 하려는 외국인이 국내에서 개최되는 국제경기대회에 참가하여 수상레저기구를 조종하는 경우에는 조종면허가 없어도 된다.', true, '국제대회 참가 외국인 등 예외 규정 취지.', 68, 25);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 관련 진술', '조종면허 효력정지 기간에 조종을 한 경우 조종면허를 취소하여야 한다.', '문제: 「수상레저안전법」 관련 진술
-
-선지: 조종면허 효력정지 기간에 조종을 한 경우 조종면허를 취소하여야 한다.', true, '필요적 취소 사유.', 69, 25);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 관련 진술', '동력수상레저기구를 조종한 경우, 술에 취한 상태임이 인정될 만한 상당한 이유가 있음에도 관계 공무원의 측정에 따르지 않은 행정처분은 1차는 면허정지이고 2차 위반부터 면허취소이다.', '문제: 「수상레저안전법」 관련 진술
-
-선지: 동력수상레저기구를 조종한 경우, 술에 취한 상태임이 인정될 만한 상당한 이유가 있음에도 관계 공무원의 측정에 따르지 않은 행정처분은 1차는 면허정지이고 2차 위반부터 면허취소이다.', false, '측정 불응 등은 1차부터 면허취소 등 중한 처분이 적용되는 유형으로 출제된다.', 70, 25);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허증·시험 관련 진술', '조종면허증의 갱신기간은 면허증 발급일부터 기산하여 7년이 되는 날부터 6개월 이내이다.', '문제: 조종면허증·시험 관련 진술
-
-선지: 조종면허증의 갱신기간은 면허증 발급일부터 기산하여 7년이 되는 날부터 6개월 이내이다.', true, '법 제12조 취지.', 71, 26);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허증·시험 관련 진술', '조종면허증을 갱신하지 아니한 경우, 갱신기간 만료 다음 날부터 조종면허의 효력이 정지된다.', '문제: 조종면허증·시험 관련 진술
-
-선지: 조종면허증을 갱신하지 아니한 경우, 갱신기간 만료 다음 날부터 조종면허의 효력이 정지된다.', false, '효력정지는 갱신기간이 만료한 날부터 된다.', 72, 26);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허증·시험 관련 진술', '조종면허가 취소된 자는 취소된 날부터 7일 이내 해양경찰청장에게 면허증을 반납하여야 한다.', '문제: 조종면허증·시험 관련 진술
-
-선지: 조종면허가 취소된 자는 취소된 날부터 7일 이내 해양경찰청장에게 면허증을 반납하여야 한다.', true, '반납 의무 규정.', 73, 26);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허증·시험 관련 진술', '약물의 영향으로 정상 조종이 어려울 염려가 있는 상태에서 동력수상레저기구를 조종한 경우 조종면허를 취소하여야 한다.', '문제: 조종면허증·시험 관련 진술
-
-선지: 약물의 영향으로 정상 조종이 어려울 염려가 있는 상태에서 동력수상레저기구를 조종한 경우 조종면허를 취소하여야 한다.', false, '임의적 취소 또는 1년 범위 효력정지 등이지, 반드시 취소만 하는 구조는 아니다.', 74, 26);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '조종면허증·시험 관련 진술', '조종면허시험에서 부정행위를 한 자는 그 처분이 있는 날부터 3년간 면허시험에 응시할 수 없다.', '문제: 조종면허증·시험 관련 진술
-
-선지: 조종면허시험에서 부정행위를 한 자는 그 처분이 있는 날부터 3년간 면허시험에 응시할 수 없다.', false, '부정행위 제한기간은 2년이다.', 75, 26);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '필요적 취소·임의적 처분 구분', '면허증을 다른 사람에게 빌려주어 조종하게 한 경우, 조종면허를 반드시 취소하여야 한다.', '문제: 필요적 취소·임의적 처분 구분
-
-선지: 면허증을 다른 사람에게 빌려주어 조종하게 한 경우, 조종면허를 반드시 취소하여야 한다.', false, '대여는 임의적 취소·정지(기간 정지 등)에 해당하는 경우가 많다.', 76, 21);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '필요적 취소·임의적 처분 구분', '술에 취한 상태에서 조종을 한 경우, 조종면허를 반드시 취소하여야 한다.', '문제: 필요적 취소·임의적 처분 구분
-
-선지: 술에 취한 상태에서 조종을 한 경우, 조종면허를 반드시 취소하여야 한다.', true, '음주 조종 등은 필요적 취소에 해당한다.', 77, 21);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '필요적 취소·임의적 처분 구분', '조종면허를 받은 자가 동력수상레저기구를 이용하여 「해상교통안전법」을 위반한 범죄행위를 한 경우, 반드시 조종면허를 취소하여야 한다.', '문제: 필요적 취소·임의적 처분 구분
-
-선지: 조종면허를 받은 자가 동력수상레저기구를 이용하여 「해상교통안전법」을 위반한 범죄행위를 한 경우, 반드시 조종면허를 취소하여야 한다.', false, '죄종·요건에 따라 임의적 취소·정지 등으로 다루어지는 경우가 있다.', 78, 21);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 일반 규정 관련 진술', '해양경찰청장은 수상레저안전관리에 관한 기본계획을 10년마다 수립·시행하여야 한다.', '문제: 「수상레저안전법」 일반 규정 관련 진술
-
-선지: 해양경찰청장은 수상레저안전관리에 관한 기본계획을 10년마다 수립·시행하여야 한다.', false, '기본계획은 5년 단위이다(법 제4조).', 79, 27);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 일반 규정 관련 진술', '만 14세 미만(제1급의 경우 만 19세 미만)인 사람은 동력수상레저기구 조종면허를 받을 수 없다.', '문제: 「수상레저안전법」 일반 규정 관련 진술
-
-선지: 만 14세 미만(제1급의 경우 만 19세 미만)인 사람은 동력수상레저기구 조종면허를 받을 수 없다.', false, '제1급은 만 18세 미만이 결격(예외는 대통령령).', 80, 27);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 일반 규정 관련 진술', '거짓이나 그 밖의 부정한 방법으로 조종면허를 받은 경우, 해양경찰청장은 조종면허를 취소하거나 1년의 범위에서 효력을 정지할 수 있다.', '문제: 「수상레저안전법」 일반 규정 관련 진술
-
-선지: 거짓이나 그 밖의 부정한 방법으로 조종면허를 받은 경우, 해양경찰청장은 조종면허를 취소하거나 1년의 범위에서 효력을 정지할 수 있다.', false, '부정 취득은 필요적 취소 사유이다.', 81, 27);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 일반 규정 관련 진술', '동력수상레저기구 조종면허의 최초 갱신기간은 발급일부터 기산하여 7년이 되는 날부터 6개월 이내이다.', '문제: 「수상레저안전법」 일반 규정 관련 진술
-
-선지: 동력수상레저기구 조종면허의 최초 갱신기간은 발급일부터 기산하여 7년이 되는 날부터 6개월 이내이다.', true, '법 제12조 취지.', 82, 27);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항규칙·기상제한 관련 진술', '다이빙대·계류장 및 교량으로부터 20미터 이내 구역에서는 10노트 이하의 속력으로 운항하여야 한다.', '문제: 운항규칙·기상제한 관련 진술
-
-선지: 다이빙대·계류장 및 교량으로부터 20미터 이내 구역에서는 10노트 이하의 속력으로 운항하여야 한다.', false, '시행령 등에 따른 서행 구역은 20미터가 아니라 10미터 이내로 규정된다.', 83, 28);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항규칙·기상제한 관련 진술', '안개 등으로 가시거리가 0.5킬로미터 이내로 제한될 때, 레이더 및 VHF를 갖추면 수상레저기구를 운항할 수 있다.', '문제: 운항규칙·기상제한 관련 진술
-
-선지: 안개 등으로 가시거리가 0.5킬로미터 이내로 제한될 때, 레이더 및 VHF를 갖추면 수상레저기구를 운항할 수 있다.', false, '가시거리 0.5km 이하 등에는 예외 없이 활동이 제한된다.', 84, 28);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항규칙·기상제한 관련 진술', '다른 수상레저기구의 진로를 횡단하며 충돌 위험이 있을 때, 다른 기구를 자기의 오른쪽에 둔 기구가 진로를 피하여야 한다.', '문제: 운항규칙·기상제한 관련 진술
-
-선지: 다른 수상레저기구의 진로를 횡단하며 충돌 위험이 있을 때, 다른 기구를 자기의 오른쪽에 둔 기구가 진로를 피하여야 한다.', true, '우현측 기준 피항 취지.', 85, 28);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항규칙·기상제한 관련 진술', '다른 사람이나 기구의 안전을 위협하거나 소음기를 임의로 제거·굉음으로 놀라게 하는 행위를 해서는 아니 된다.', '문제: 운항규칙·기상제한 관련 진술
-
-선지: 다른 사람이나 기구의 안전을 위협하거나 소음기를 임의로 제거·굉음으로 놀라게 하는 행위를 해서는 아니 된다.', true, '안전·질서 위반 금지.', 86, 28);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항규칙 관련 진술', '안개 등으로 가시거리가 0.5해리 이내로 제한되는 경우에도 수상레저기구를 운항할 수 있다.', '문제: 운항규칙 관련 진술
-
-선지: 안개 등으로 가시거리가 0.5해리 이내로 제한되는 경우에도 수상레저기구를 운항할 수 있다.', false, '기준 거리는 0.5해리가 아니라 0.5킬로미터이다.', 87, 29);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항규칙 관련 진술', '다른 수상레저기구의 진로를 횡단할 때 충돌 위험이 있으면, 다른 기구를 왼쪽에 둔 수상레저기구가 진로를 피하여야 한다.', '문제: 운항규칙 관련 진술
-
-선지: 다른 수상레저기구의 진로를 횡단할 때 충돌 위험이 있으면, 다른 기구를 왼쪽에 둔 수상레저기구가 진로를 피하여야 한다.', false, '다른 기구를 오른쪽에 둔 쪽이 피해야 한다.', 88, 30);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항규칙 관련 진술', '안개 등으로 가시거리가 0.5킬로미터 이내로 제한되는 경우에는 수상레저기구를 운항해서는 아니 된다.', '문제: 운항규칙 관련 진술
-
-선지: 안개 등으로 가시거리가 0.5킬로미터 이내로 제한되는 경우에는 수상레저기구를 운항해서는 아니 된다.', true, '법 제22조 등 기상·가시거리 제한.', 89, 30);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항규칙 관련 진술', '다른 수상레저기구를 추월하려는 경우, 추월당하는 기구를 완전히 추월하거나 충분히 멀어질 때까지 그 진로를 방해하여서는 아니 된다.', '문제: 운항규칙 관련 진술
-
-선지: 다른 수상레저기구를 추월하려는 경우, 추월당하는 기구를 완전히 추월하거나 충분히 멀어질 때까지 그 진로를 방해하여서는 아니 된다.', true, '추월 시 진로 방해 금지.', 90, 31);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항규칙 관련 진술', '다른 수상레저기구와 정면으로 충돌할 위험이 있을 때, 음성·수신호 등으로 알리고 좌현 쪽으로 진로를 피하여야 한다.', '문제: 운항규칙 관련 진술
-
-선지: 다른 수상레저기구와 정면으로 충돌할 위험이 있을 때, 음성·수신호 등으로 알리고 좌현 쪽으로 진로를 피하여야 한다.', false, '정면 충돌 위험 시 우현(오른쪽)으로 피한다.', 91, 31);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '기상특보·가시거리 제한 관련 진술', '수상레저활동 구역에 태풍·풍랑·폭풍해일·호우·대설·강풍 관련 주의보 이상 기상특보가 발표된 경우 수상레저활동을 하여서는 아니 된다.', '문제: 기상특보·가시거리 제한 관련 진술
-
-선지: 수상레저활동 구역에 태풍·풍랑·폭풍해일·호우·대설·강풍 관련 주의보 이상 기상특보가 발표된 경우 수상레저활동을 하여서는 아니 된다.', true, '기상특보 시 활동 제한 취지.', 92, 32);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '기상특보·가시거리 제한 관련 진술', '안개 등으로 가시거리가 0.5킬로미터 이내로 제한되는 경우 수상레저활동을 하여서는 아니 된다.', '문제: 기상특보·가시거리 제한 관련 진술
-
-선지: 안개 등으로 가시거리가 0.5킬로미터 이내로 제한되는 경우 수상레저활동을 하여서는 아니 된다.', true, '가시거리 제한 시 원칙적 금지.', 93, 32);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '기상특보·가시거리 제한 관련 진술', '가시거리가 0.5킬로미터 이내로 제한되는 경우, 기상특보발효활동신고를 하면 파도·바람만 이용하는 기구는 활동할 수 있다.', '문제: 기상특보·가시거리 제한 관련 진술
-
-선지: 가시거리가 0.5킬로미터 이내로 제한되는 경우, 기상특보발효활동신고를 하면 파도·바람만 이용하는 기구는 활동할 수 있다.', false, '가시거리 제한에는 통상 예외 신고로 활동이 허용되지 않는다.', 94, 32);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항·경계 관련 진술', '다른 수상레저기구와 같은 방향으로 운항할 때 2미터 이내로 근접하여 운항해서는 아니 된다.', '문제: 운항·경계 관련 진술
-
-선지: 다른 수상레저기구와 같은 방향으로 운항할 때 2미터 이내로 근접하여 운항해서는 아니 된다.', true, '근접 운항 금지.', 95, 33);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항·경계 관련 진술', '시각·청각 등 당시 상황에 맞는 모든 수단으로 충돌 위험을 판단할 수 있도록 항상 적절한 경계를 하여야 한다.', '문제: 운항·경계 관련 진술
-
-선지: 시각·청각 등 당시 상황에 맞는 모든 수단으로 충돌 위험을 판단할 수 있도록 항상 적절한 경계를 하여야 한다.', true, '경계 의무.', 96, 33);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항·경계 관련 진술', '안개 등으로 가시거리가 0.5킬로미터 이내일 때, 레이더와 VHF를 갖추면 수상레저기구를 운항할 수 있다.', '문제: 운항·경계 관련 진술
-
-선지: 안개 등으로 가시거리가 0.5킬로미터 이내일 때, 레이더와 VHF를 갖추면 수상레저기구를 운항할 수 있다.', false, '가시거리 제한 시 장비로 예외를 두지 않는다.', 97, 33);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '운항·경계 관련 진술', '앞지르기(추월)하려는 경우, 앞지르기당하는 기구를 완전히 앞지르거나 충분히 멀어질 때까지 진로를 방해해서는 아니 된다.', '문제: 운항·경계 관련 진술
-
-선지: 앞지르기(추월)하려는 경우, 앞지르기당하는 기구를 완전히 앞지르거나 충분히 멀어질 때까지 진로를 방해해서는 아니 된다.', true, '추월 시 진로 방해 금지.', 98, 33);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '수상레저활동 의무·금지 관련 진술', '수상레저활동을 하려는 자는 구명조끼 등 인명안전에 필요한 장비를 착용하여야 한다.', '문제: 수상레저활동 의무·금지 관련 진술
-
-선지: 수상레저활동을 하려는 자는 구명조끼 등 인명안전에 필요한 장비를 착용하여야 한다.', true, '안전장비 착용 의무.', 99, 34);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '수상레저활동 의무·금지 관련 진술', '출발항으로부터 10킬로미터 이상 떨어진 곳에서 수상레저활동을 하려는 자는 해양경찰관서나 경찰관서에 신고하여야 한다. 다만 「선박의 입항 및 출항 등에 관한 법률」 등에 따른 출입신고를 한 경우에는 그러하지 아니하다.', '문제: 수상레저활동 의무·금지 관련 진술
-
-선지: 출발항으로부터 10킬로미터 이상 떨어진 곳에서 수상레저활동을 하려는 자는 해양경찰관서나 경찰관서에 신고하여야 한다. 다만 「선박의 입항 및 출항 등에 관한 법률」 등에 따른 출입신고를 한 경우에는 그러하지 아니하다.', false, '원거리 신고 기준은 10킬로미터가 아니라 10해리이다(법 제23조).', 100, 34);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '수상레저활동 의무·금지 관련 진술', '수상레저기구 조종자는 정원을 초과하여 사람을 태우고 운항하여서는 아니 된다.', '문제: 수상레저활동 의무·금지 관련 진술
-
-선지: 수상레저기구 조종자는 정원을 초과하여 사람을 태우고 운항하여서는 아니 된다.', true, '정원 준수.', 101, 34);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '수상레저활동 의무·금지 관련 진술', '해 진 후 30분부터 해 뜨기 전 30분까지는 수상레저활동을 하여서는 아니 된다. 다만 야간운항장비를 갖춘 경우 등 해양수산부령으로 정하는 바에 따른 예외가 있다.', '문제: 수상레저활동 의무·금지 관련 진술
-
-선지: 해 진 후 30분부터 해 뜨기 전 30분까지는 수상레저활동을 하여서는 아니 된다. 다만 야간운항장비를 갖춘 경우 등 해양수산부령으로 정하는 바에 따른 예외가 있다.', true, '야간 활동 제한과 예외.', 102, 34);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '수상레저활동 의무·금지 관련 진술', '다이빙대·계류장 및 교량으로부터 20미터 이내 구역이나 지정 위험구역에서는 10노트 이하로 운항하고 별도 운항지침을 따라야 한다.', '문제: 수상레저활동 의무·금지 관련 진술
-
-선지: 다이빙대·계류장 및 교량으로부터 20미터 이내 구역이나 지정 위험구역에서는 10노트 이하로 운항하고 별도 운항지침을 따라야 한다.', false, '시행령 등에 따르면 해당 서행 구역은 20미터가 아니라 10미터 이내 등으로 규정된다.', 103, 34);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동·사고 신고 관련 진술', '원거리 수상레저활동 신고는 해양경찰관서(파출소)에만 하면 된다.', '문제: 원거리 수상레저활동·사고 신고 관련 진술
-
-선지: 원거리 수상레저활동 신고는 해양경찰관서(파출소)에만 하면 된다.', false, '경찰관서에도 신고할 수 있다.', 104, 35);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동·사고 신고 관련 진술', '사고로 사망·실종·중상해가 발생한 경우의 통지는 해양경찰관서에만 하면 된다.', '문제: 원거리 수상레저활동·사고 신고 관련 진술
-
-선지: 사고로 사망·실종·중상해가 발생한 경우의 통지는 해양경찰관서에만 하면 된다.', false, '경찰·소방 관서 등에도 통지할 수 있다.', 105, 35);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동·사고 신고 관련 진술', '사고를 통지하려는 자는 전화·팩스 또는 그 밖의 적절한 방법으로 통지할 수 있다.', '문제: 원거리 수상레저활동·사고 신고 관련 진술
-
-선지: 사고를 통지하려는 자는 전화·팩스 또는 그 밖의 적절한 방법으로 통지할 수 있다.', true, '통지 방법 규정.', 106, 35);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동·사고 신고 관련 진술', '제1급 조종면허를 소지한 자는 원거리 수상레저활동 신고를 하지 않아도 된다.', '문제: 원거리 수상레저활동·사고 신고 관련 진술
-
-선지: 제1급 조종면허를 소지한 자는 원거리 수상레저활동 신고를 하지 않아도 된다.', false, '면허 종류만으로 신고가 면제되지 않는다.', 107, 35);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동 신고 관련 진술', '활동 지역이 출발항으로부터 10해리 이상 떨어진 곳이면 원거리 수상레저활동 신고 대상이 될 수 있다.', '문제: 원거리 수상레저활동 신고 관련 진술
-
-선지: 활동 지역이 출발항으로부터 10해리 이상 떨어진 곳이면 원거리 수상레저활동 신고 대상이 될 수 있다.', true, '거리 기준은 출발항 기준 10해리.', 108, 36);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동 신고 관련 진술', '「선박의 입항 및 출항 등에 관한 법률」에 따른 출입신고를 한 선박이면, 10해리 이상 나가도 별도의 원거리 수상레저활동 신고가 필요 없다.', '문제: 원거리 수상레저활동 신고 관련 진술
-
-선지: 「선박의 입항 및 출항 등에 관한 법률」에 따른 출입신고를 한 선박이면, 10해리 이상 나가도 별도의 원거리 수상레저활동 신고가 필요 없다.', true, '법에서 정한 신고 면제 사유.', 109, 36);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동 신고 관련 진술', '활동 지역이 육지로부터 9해리 이상 떨어졌다면 반드시 원거리 수상레저활동 신고를 하여야 한다.', '문제: 원거리 수상레저활동 신고 관련 진술
-
-선지: 활동 지역이 육지로부터 9해리 이상 떨어졌다면 반드시 원거리 수상레저활동 신고를 하여야 한다.', false, '기준은 육지가 아니라 출발항으로부터의 거리이다.', 110, 36);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.', '0개', '문제: 「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.
-
-선지: 0개', true, '법 제37조·제23조. 가·나·다 모두 진술이 틀려 옳은 것은 0개이다.', 111, 37);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.', '1개', '문제: 「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.
-
-선지: 1개', false, '정답은 0개이다.', 112, 37);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.', '2개', '문제: 「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.
-
-선지: 2개', false, '정답은 0개이다.', 113, 37);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.', '3개', '문제: 「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.
-
-선지: 3개', false, '정답은 0개이다.', 114, 37);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)', '1개', '문제: 「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)
-
-선지: 1개', false, '㉠·㉡·㉢이 옳지 않은 진술이므로 3개이다(법 제25·26·23조 등).', 115, 38);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)', '2개', '문제: 「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)
-
-선지: 2개', false, '정답은 3개이다.', 116, 38);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)', '3개', '문제: 「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)
-
-선지: 3개', true, '㉠(효력정지는 제외가 아니라 포함)·㉡(해 진 후 30분~해 뜨기 전 30분)·㉢(10해리)가 법문과 다르다.', 117, 38);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)', '4개', '문제: 「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)
-
-선지: 4개', false, '정답은 3개이다.', 118, 38);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)', '1개', '문제: 「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)
-
-선지: 1개', false, '시행규칙 제28조에 따라 네 가지 모두 해당 사유에 해당할 수 있어 4개이다.', 119, 39);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)', '2개', '문제: 「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)
-
-선지: 2개', false, '정답은 4개이다.', 120, 39);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)', '3개', '문제: 「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)
-
-선지: 3개', false, '정답은 4개이다.', 121, 39);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)', '4개', '문제: 「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)
-
-선지: 4개', true, '시행규칙 제28조(무면허조종이 허용되는 경우).', 122, 39);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?', '해 진 후 30분부터 해 뜨기 전 30분까지는 수상레저활동을 하여서는 아니 된다. 다만, 야간운항장비를 모두 갖춘 경우에는 운항이 가능하다.', '문제: 「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?
-
-선지: 해 진 후 30분부터 해 뜨기 전 30분까지는 수상레저활동을 하여서는 아니 된다. 다만, 야간운항장비를 모두 갖춘 경우에는 운항이 가능하다.', true, '법 제26조 취지와 부합하는 진술이다.', 123, 40);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?', '해양경찰서장 및 해양수산부장관 또는 시장·군수·구청장은 야간운항 허용시간을 조정해야 한다.', '문제: 「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?
-
-선지: 해양경찰서장 및 해양수산부장관 또는 시장·군수·구청장은 야간운항 허용시간을 조정해야 한다.', false, '해양수산부장관은 야간운항 허용시간 조정 권한 주체에 포함되지 않는다(법 제26조).', 124, 40);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?', '야간 운항장비에는 항해등, 구명부환, 통신기기 등이 포함된다.', '문제: 「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?
-
-선지: 야간 운항장비에는 항해등, 구명부환, 통신기기 등이 포함된다.', true, '시행규칙 등에 따른 야간 운항장비 예시에 부합한다.', 125, 40);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?', '해양수산부령으로 정하는 야간 운항장비를 갖춘 수상레저기구를 이용하는 경우 야간운항이 가능하다.', '문제: 「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?
-
-선지: 해양수산부령으로 정하는 야간 운항장비를 갖춘 수상레저기구를 이용하는 경우 야간운항이 가능하다.', true, '법 제26조 단서 취지.', 126, 40);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)', '10개', '문제: 「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)
-
-선지: 10개', false, '시행규칙 제29조 기준 8개(정답 ③).', 127, 41);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)', '9개', '문제: 「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)
-
-선지: 9개', false, '정답은 8개이다.', 128, 41);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)', '8개', '문제: 「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)
-
-선지: 8개', true, '시행규칙 제29조(야간 운항장비). 구조용 로프·노는 해당 목록에서 제외되는 경우로 출제된다.', 129, 41);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)', '7개', '문제: 「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)
-
-선지: 7개', false, '정답은 8개이다.', 130, 41);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?', '지방해양경찰청장', '문제: 「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?
-
-선지: 지방해양경찰청장', false, '제30조에 따르면 해양경찰서장 또는 시장·군수·구청장이 지정할 수 있고, 지방해양경찰청장은 여기에 해당하지 않는다.', 131, 42);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?', '해양경찰서장', '문제: 「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?
-
-선지: 해양경찰서장', true, '해양경찰서장은 금지구역 지정 권한이 있다.', 132, 42);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?', '시장', '문제: 「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?
-
-선지: 시장', true, '시장은 지정 권한이 있다.', 133, 42);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?', '구청장', '문제: 「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?
-
-선지: 구청장', true, '구청장은 지정 권한이 있다.', 134, 42);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?', '해양경찰서장 또는 시장·군수·구청장', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?
-
-선지: 해양경찰서장 또는 시장·군수·구청장', true, '제30조(수상레저활동 금지구역의 지정 등).', 135, 43);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?', '해양경찰서장', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?
-
-선지: 해양경찰서장', false, '시장·군수·구청장과 함께 규정된 지정 주체를 모두 포함한 ①이 가장 옳다.', 136, 43);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?', '시장·군수·구청장', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?
-
-선지: 시장·군수·구청장', false, '해양경찰서장도 지정 주체이므로 ①이 정답이다.', 137, 43);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?', '지방해양경찰청장', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?
-
-선지: 지방해양경찰청장', false, '지방해양경찰청장 단독 지정 규정은 없다.', 138, 43);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?', '수상레저기구 조종자의 교체', '문제: 「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?
-
-선지: 수상레저기구 조종자의 교체', true, '법 제31조(시정명령) 각 호에 해당한다.', 139, 44);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?', '수상레저활동의 일시정지', '문제: 「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?
-
-선지: 수상레저활동의 일시정지', true, '제31조 각 호에 해당한다.', 140, 44);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?', '수상레저기구의 압류', '문제: 「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?
-
-선지: 수상레저기구의 압류', false, '압류는 규정된 시정명령 사항이 아니다(제31조).', 141, 44);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?', '수상레저기구 탑승인원의 제한', '문제: 「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?
-
-선지: 수상레저기구 탑승인원의 제한', true, '제31조 제1호에 해당한다.', 142, 44);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)', '해양경찰서장', '문제: 「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)
-
-선지: 해양경찰서장', false, '제33조 문언과 다르다.', 143, 45);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)', '지방해양경찰청장', '문제: 「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)
-
-선지: 지방해양경찰청장', false, '제33조 문언과 다르다.', 144, 45);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)', '지방해양경찰청장, 해양경찰시장', '문제: 「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)
-
-선지: 지방해양경찰청장, 해양경찰시장', false, '제33조 문언과 다르다.', 145, 45);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)', '해양경찰청장, 지방해양경찰청장 또는 해양경찰서장', '문제: 「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)
-
-선지: 해양경찰청장, 지방해양경찰청장 또는 해양경찰서장', true, '제33조(관계 행정기관의 협조).', 146, 45);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?', '영업구역이 둘 이상의 해양경찰서장의 관할 지역에 걸쳐 있는 경우 수상레저기구를 주로 매어두는 장소를 관할하는 지방해양경찰청장에게 등록하여야 한다.', '문제: 「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?
-
-선지: 영업구역이 둘 이상의 해양경찰서장의 관할 지역에 걸쳐 있는 경우 수상레저기구를 주로 매어두는 장소를 관할하는 지방해양경찰청장에게 등록하여야 한다.', false, '지방해양경찰청장이 아니라 해양경찰서장 또는 시장·군수·구청장에게 등록한다(법 제37조).', 147, 46);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?', '무동력 수상레저기구만을 이용하여 수상레저사업을 하는 경우에는 수상레저사업자 또는 그 종사자 중 1명 이상이 제2급조종면허 이상의 자격을 갖추기만 하면 된다.', '문제: 「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?
-
-선지: 무동력 수상레저기구만을 이용하여 수상레저사업을 하는 경우에는 수상레저사업자 또는 그 종사자 중 1명 이상이 제2급조종면허 이상의 자격을 갖추기만 하면 된다.', true, '등록기준 취지에 부합한다.', 148, 46);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?', '수상레저기구 탑승정원의 110% 이상에 해당하는 수의 구명조끼를 갖추어야 하고 탑승정원의 10%는 소아용으로 한다.', '문제: 「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?
-
-선지: 수상레저기구 탑승정원의 110% 이상에 해당하는 수의 구명조끼를 갖추어야 하고 탑승정원의 10%는 소아용으로 한다.', true, '시행규칙 제32조 등 취지.', 149, 46);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?', '비상구조선은 탑승정원이 3명 이상, 속도가 20노트 이상이어야 한다.', '문제: 「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?
-
-선지: 비상구조선은 탑승정원이 3명 이상, 속도가 20노트 이상이어야 한다.', true, '시행규칙 제32조 등 취지.', 150, 46);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?', '275', '문제: 「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?
-
-선지: 275', false, '110+10+165+15=300(시행규칙 제32조).', 151, 47);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?', '300', '문제: 「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?
-
-선지: 300', true, '구명조끼 110%·10% 소아용, 탑승정원 150명일 때 165·15벌 등 해설 합산.', 152, 47);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?', '315', '문제: 「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?
-
-선지: 315', false, '정답은 300이다.', 153, 47);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?', '320', '문제: 「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?
-
-선지: 320', false, '정답은 300이다.', 154, 47);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)', '55', '문제: 「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)
-
-선지: 55', false, '3+20+4+30=57(시행규칙 제32조).', 155, 48);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)', '56', '문제: 「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)
-
-선지: 56', false, '정답은 57이다.', 156, 48);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)', '57', '문제: 「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)
-
-선지: 57', true, '비상구조선 3명·20노트, 구명부환 4명 이상 30% 등.', 157, 48);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)', '58', '문제: 「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)
-
-선지: 58', false, '정답은 57이다.', 158, 48);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)', '32', '문제: 「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)
-
-선지: 32', false, '4+30+4+2+2=42(시행규칙 제32조).', 159, 49);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)', '36', '문제: 「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)
-
-선지: 36', false, '정답은 42이다.', 160, 49);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)', '40', '문제: 「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)
-
-선지: 40', false, '정답은 42이다.', 161, 49);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)', '42', '문제: 「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)
-
-선지: 42', true, '4+30+4+2+2=42.', 162, 49);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?', '래프팅용 수상레저기구만을 이용하여 수상레저사업을 하는 경우에는 수상레저사업자 또는 그 종사자 중 1명 이상이 2급 조종면허 이상의 자격을 갖추기만 하면 된다.', '문제: 「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?
-
-선지: 래프팅용 수상레저기구만을 이용하여 수상레저사업을 하는 경우에는 수상레저사업자 또는 그 종사자 중 1명 이상이 2급 조종면허 이상의 자격을 갖추기만 하면 된다.', false, '래프팅만 이용 시 조종면허 확보 의무가 면제되는 등 기준과 다르다(시행규칙 제32조).', 163, 50);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?', '해수면에서 수상레저사업을 경영하려는 자는 공유수면의 점용 또는 사용의 허가 등에 관한 서류를 관할 해양경찰서장에게 제출하여야 한다.', '문제: 「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?
-
-선지: 해수면에서 수상레저사업을 경영하려는 자는 공유수면의 점용 또는 사용의 허가 등에 관한 서류를 관할 해양경찰서장에게 제출하여야 한다.', true, '절차 진술에 부합한다.', 164, 50);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?', '조종면허를 갖고서 수상레저사업장에 종사하고 있는 사람은 해당 수상레저사업장에 종사하고 있는 기간 동안 다른 수상레저사업장에 종사하여서는 아니 된다.', '문제: 「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?
-
-선지: 조종면허를 갖고서 수상레저사업장에 종사하고 있는 사람은 해당 수상레저사업장에 종사하고 있는 기간 동안 다른 수상레저사업장에 종사하여서는 아니 된다.', true, '겸직 제한 취지.', 165, 50);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?', '비상구조선은 수상레저사업자가 해당 수상레저사업에 사용되는 수상레저기구 중에서 정하여 사용하되, 지정된 비상구조선은 사업장 구역의 순시와 사고 발생 시 인명구조를 위하여 사용하여야 한다.', '문제: 「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?
-
-선지: 비상구조선은 수상레저사업자가 해당 수상레저사업에 사용되는 수상레저기구 중에서 정하여 사용하되, 지정된 비상구조선은 사업장 구역의 순시와 사고 발생 시 인명구조를 위하여 사용하여야 한다.', true, '비상구조선 운용 취지.', 166, 50);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?', '영업구역 두 곳을 관할하는 지방해양경찰청장 또는 해양경찰청장', '문제: 「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?
-
-선지: 영업구역 두 곳을 관할하는 지방해양경찰청장 또는 해양경찰청장', false, '법 제37조에 따르면 기구를 주로 매어두는 장소를 관할하는 해양경찰서장 또는 시장·군수·구청장이다.', 167, 51);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?', '수상레저사업자 주소지를 관할하는 해양경찰서장 또는 시장·군수·구청장', '문제: 「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?
-
-선지: 수상레저사업자 주소지를 관할하는 해양경찰서장 또는 시장·군수·구청장', false, '주소지 관할이 아니다.', 168, 51);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?', '수상레저사업장 소재지를 관할하는 해양경찰서장 또는 시장·군수·구청장', '문제: 「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?
-
-선지: 수상레저사업장 소재지를 관할하는 해양경찰서장 또는 시장·군수·구청장', false, '사업장 소재지가 아니라 주로 매어두는 장소 관할이다.', 169, 51);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?', '수상레저사업에 사용되는 수상레저기구를 주로 매어두는 장소를 관할하는 해양경찰서장 또는 시장·군수·구청장', '문제: 「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?
-
-선지: 수상레저사업에 사용되는 수상레저기구를 주로 매어두는 장소를 관할하는 해양경찰서장 또는 시장·군수·구청장', true, '법 제37조(수상레저사업의 등록 등).', 170, 51);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?', '수상레저기구를 빌려주는 사업 또는 판매하는 사업이다.', '문제: 「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?
-
-선지: 수상레저기구를 빌려주는 사업 또는 판매하는 사업이다.', false, '판매 사업은 해당 정의에 포함되지 않는다.', 171, 52);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?', '영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 지방 해양경찰청장 또는 시·도지사에게 등록한다.', '문제: 「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?
-
-선지: 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 지방 해양경찰청장 또는 시·도지사에게 등록한다.', false, '법 제37조에 따른 관할이 아니다.', 172, 52);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?', '수상레저사업 등록취소권자는 해양경찰서장 또는 시장·군수·구청장이다.', '문제: 「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?
-
-선지: 수상레저사업 등록취소권자는 해양경찰서장 또는 시장·군수·구청장이다.', true, '등록·취소 등 관할 취지에 부합한다.', 173, 52);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?', '수상레저사업자 또는 그 종사자가 고의로 사람을 사상한 때에는 반드시 수상레저사업 등록을 취소하여야 한다.', '문제: 「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?
-
-선지: 수상레저사업자 또는 그 종사자가 고의로 사람을 사상한 때에는 반드시 수상레저사업 등록을 취소하여야 한다.', false, '반드시 취소가 아니라 취소·정지 등 임의적 처분이 될 수 있다.', 174, 52);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?', '영업구역이 내수면인 경우 해당 지역을 관할하는 해양경찰서장 또는 시장·군수·구청장에게 등록해야 한다.', '문제: 「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?
-
-선지: 영업구역이 내수면인 경우 해당 지역을 관할하는 해양경찰서장 또는 시장·군수·구청장에게 등록해야 한다.', false, '내수면은 시장·군수·구청장에게 등록한다(법 제37조).', 175, 53);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?', '영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 수상레저기구를 주로 매어두는 장소를 관할하는 지방해양경찰청장 또는 시장·군수·구청장에게 등록해야 한다.', '문제: 「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?
-
-선지: 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 수상레저기구를 주로 매어두는 장소를 관할하는 지방해양경찰청장 또는 시장·군수·구청장에게 등록해야 한다.', false, '지방해양경찰청장이 아니라 해양경찰서장 또는 시장·군수·구청장이다.', 176, 53);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?', '피성년후견인은 수상레저사업 등록을 할 수 없다.', '문제: 「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?
-
-선지: 피성년후견인은 수상레저사업 등록을 할 수 없다.', true, '결격 사유에 해당한다.', 177, 53);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?', '수상레저기구를 빌려주거나 판매하는 사업은 수상레저사업에 해당된다.', '문제: 「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?
-
-선지: 수상레저기구를 빌려주거나 판매하는 사업은 수상레저사업에 해당된다.', false, '판매는 수상레저사업 정의에 포함되지 않는다.', 178, 53);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?', '수상레저사업의 등록 유효기간은 10년으로 하되, 10년 미만으로 영업하려는 경우에는 해당 영업기간을 등록 유효기간으로 한다.', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?
-
-선지: 수상레저사업의 등록 유효기간은 10년으로 하되, 10년 미만으로 영업하려는 경우에는 해당 영업기간을 등록 유효기간으로 한다.', true, '유효기간 규정에 부합한다.', 179, 54);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?', '수상레저사업자가 등록된 사업기간 중에 휴업하거나 폐업하려는 경우에는 해양경찰서장 또는 시·도지사에게 신고하여야 한다.', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?
-
-선지: 수상레저사업자가 등록된 사업기간 중에 휴업하거나 폐업하려는 경우에는 해양경찰서장 또는 시·도지사에게 신고하여야 한다.', false, '시·도지사가 아니라 해양경찰서장 또는 시장·군수·구청장에게 신고한다(법 제41조).', 180, 54);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?', '해양경찰서장은 영업구역이 해수면인 수상레저사업자가 거짓이나 그 밖의 부정한 방법으로 수상레저사업을 등록한 경우 등록을 취소하여야 한다.', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?
-
-선지: 해양경찰서장은 영업구역이 해수면인 수상레저사업자가 거짓이나 그 밖의 부정한 방법으로 수상레저사업을 등록한 경우 등록을 취소하여야 한다.', true, '등록 취소 사유에 해당한다.', 181, 54);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?', '「수상레저안전법」을 위반하여 징역 이상의 실형을 선고받고 그 집행이 끝나거나 집행이 면제된 날부터 2년이 지나지 아니한 사람은 수상레저사업 등록을 할 수 없다.', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?
-
-선지: 「수상레저안전법」을 위반하여 징역 이상의 실형을 선고받고 그 집행이 끝나거나 집행이 면제된 날부터 2년이 지나지 아니한 사람은 수상레저사업 등록을 할 수 없다.', true, '등록 결격 취지.', 182, 54);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?', '수상레저기구 안에서 술을 판매·제공하거나 수상레저기구 사업자가 수상레저기구 안으로 이를 반입하도록 하는 행위', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?
-
-선지: 수상레저기구 안에서 술을 판매·제공하거나 수상레저기구 사업자가 수상레저기구 안으로 이를 반입하도록 하는 행위', false, '법 제44조는 이용자가 반입하도록 하는 경우이지 사업자가 반입시키는 표현으로 한정되지 않는다.', 183, 55);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?', '수상레저사업자 또는 그 종사자의 고의 또는 과실로 사람을 사상한 행위', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?
-
-선지: 수상레저사업자 또는 그 종사자의 고의 또는 과실로 사람을 사상한 행위', false, '등록취소 등 사유에 해당할 수 있으나 제44조 각호의 ‘금지행위’ 문언과 동일하게 보기 어렵다.', 184, 55);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?', '공유수면의 점용 또는 사용 허가 기간 만료 이후에도 사업을 계속하는 행위', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?
-
-선지: 공유수면의 점용 또는 사용 허가 기간 만료 이후에도 사업을 계속하는 행위', false, '등록취소 사유에 가깝다.', 185, 55);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?', '대통령령으로 정하는 폭발물·인화물질 등의 위험물을 이용자가 타고 있는 수상레저기구로 반입·운송하는 행위', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?
-
-선지: 대통령령으로 정하는 폭발물·인화물질 등의 위험물을 이용자가 타고 있는 수상레저기구로 반입·운송하는 행위', true, '법 제44조 제1항제6호에 해당한다.', 186, 55);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)', '없음', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)
-
-선지: 없음', false, '제44조와 대조 시 정답은 3개로 보는 것이 타당하다(㉡·㉣·㉥ 등).', 187, 56);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)', '1개', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)
-
-선지: 1개', false, '해설 참고.', 188, 56);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)', '2개', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)
-
-선지: 2개', false, '해설 참고.', 189, 56);
-  insert into public.quiz_questions (unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)', '3개', '문제: 「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)
-
-선지: 3개', true, '정원 초과(㉡), 위험물 반입(㉣), 비상구조선 목적 외 사용(㉥) 등 제44조 각호에 해당하는지 해설서 기준으로 판단한다.', 190, 56);
+  insert into public.quiz_units (subject_id, parent_unit_id, name, sort_order) values (sid, null, '수상레저안전법', 0) returning id into uid;
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?', '"수상레저활동"은 해상에서만 이루어지는 활동을 말한다.', false, '해상이 아니라 수상(해수면+내수면)에서의 활동이다.', 0, 3);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?', '"동력수상레저기구"는 추진기관이 부착되어 있거나 수시 부착·분리가 가능한 기구를 말한다.', true, '법 제2조 정의에 해당한다.', 1, 3);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?', '"수상"은 해수면·내수면을 말하며, 내수면에는 인공 조성 담수·기수 수류/수면이 포함된다.', true, '법 제2조 정의에 해당한다.', 2, 3);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 설명 중 가장 옳지 않은 것은?', '"래프팅"은 무동력수상레저기구를 이용해 계곡/하천에서 급류·물의 흐름을 타는 활동이다.', true, '법 제2조 정의에 해당한다.', 3, 3);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?', '동력수상레저기구는 단순히 추진기관이 부착된 기구만 말한다.', false, '법 제2조는 추진기관이 부착된 경우뿐 아니라, 부착·분리가 수시로 가능한 수상레저기구(대통령령으로 정하는 것)까지 포함한다. ①은 정의를 좁게만 설명한다.', 4, 4);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?', '동력수상레저기구는 5마력 이상 추진기관 부착 기구를 말한다.', false, '동력수상레저기구는 출력(마력) 기준으로 정의되지 않는다.', 5, 4);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?', '동력수상레저기구는 10마력 이상 추진기관 부착 기구를 말한다.', false, '동력수상레저기구는 출력(마력) 기준으로 정의되지 않는다.', 6, 4);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구의 정의로 가장 옳은 것은?', '동력수상레저기구는 추진기관 부착 또는 수시 부착·분리 가능한 기구다.', true, '「동력수상레저기구」란 추진기관이 부착되어 있거나 추진기관을 부착하거나 분리하는 것이 수시로 가능한 수상레저기구로서 대통령령으로 정하는 것을 말한다. (법 제2조 정의)', 7, 4);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?', '해당 용어는 "수상"이다.', false, '해당 정의는 내수면이다.', 8, 5);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?', '해당 용어는 "해수면"이다.', false, '해수면이 아니라 내수면이다.', 9, 5);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?', '해당 용어는 "내수면"이다.', true, '법 제2조 정의에 맞다.', 10, 5);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '하천·댐·호수·늪·저수지 및 인공 담수/기수 수류·수면을 뜻하는 용어로 가장 옳은 것은?', '해당 용어는 "개항면"이다.', false, '법 정의 용어가 아니다.', 11, 5);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?', '"수상레저활동"은 수상에서 수상레저기구를 이용해 취미·오락·체육·교육 등을 목적으로 하는 활동이다.', true, '법 제2조 정의와 일치한다.', 12, 6);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?', '"수상레저기구"는 수상레저활동에 이용되는 선박/기구로서 대통령령으로 정하는 것이다.', true, '법 제2조 정의와 일치한다.', 13, 6);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?', '"수상"에서 내수면은 인공 조성 담수/기수 수류·수면을 제외한다.', false, '제외가 아니라 포함한다.', 14, 6);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상의 용어 정의 중 가장 옳지 않은 것은?', '"래프팅"은 무동력수상레저기구를 이용해 계곡/하천에서 급류·물의 흐름을 타는 활동이다.', true, '법 제2조 정의와 일치한다.', 15, 6);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?', '어선을 이용한 유락행위는 수상레저안전법 적용 가능 사례다.', true, '적용 배제 사유에 해당하지 않는다.', 16, 8);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?', '낚시어선업 신고 모터보트는 수상레저안전법 적용 사례다.', false, '낚시어선업 관련 행위는 적용 배제다.', 17, 8);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?', '유선사업에 이용되는 오리보트는 수상레저안전법 적용 사례다.', false, '유·도선 사업 관련 행위는 적용 배제다.', 18, 8);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '다음 중 「수상레저안전법」이 적용되는 경우로 가장 옳은 것은?', '체육시설업 요트장업 이용 요트는 수상레저안전법 적용 사례다.', false, '체육시설업 관련 행위는 적용 배제다.', 19, 8);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?', '동력이 장착된 요트를 조종하려면 요트조종면허가 필요하다.', true, '요트 조종은 면허 대상이다.', 20, 9);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?', '조종면허는 제1급/제2급 일반 + 제1급/제2급 요트로 구분된다.', false, '요트조종면허는 1종으로 보며 1·2급 구분이 아니다.', 21, 9);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?', '제2급 일반 취득자가 제1급을 취득하면 제2급 효력은 상실된다.', true, '해설 취지에 부합한다.', 22, 9);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허와 관련된 내용 중 가장 옳지 않은 것은?', '최대출력 5마력 이상 동력수상레저기구 조종에는 조종면허가 필요하다.', true, '면허 대상 기준에 해당한다.', 23, 9);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?', '특례는 국제경기대회 개회 7일 전부터 대회 기간까지만 적용된다.', false, '개회 10일 전부터 종료 후 10일까지다.', 24, 10);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?', '특례는 2개국 이상 참여 국제경기대회에 적용된다.', true, '적용 요건에 해당한다.', 25, 10);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?', '외국인이 국내 국제경기대회 참가 중 조종하는 경우 특례를 적용한다.', true, '적용 대상 설명에 부합한다.', 26, 10);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」의 외국인 조종면허 특례 설명 중 가장 옳지 않은 것은?', '외국인 조종면허 특례는 모든 동력수상레저기구에 적용된다.', true, '해설 기준으로 O 처리.', 27, 10);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?', '정신질환자 중 수상레저활동을 할 수 없다고 인정되어 대통령령으로 정하는 자는 결격사유에 해당한다.', true, '법상 결격사유에 해당한다.', 28, 13);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?', '만 14세 미만(제1급의 경우 18세 미만)은 모두 결격사유에 해당한다.', false, '예외적으로 대통령령상 체육 관련 단체 선수 등록자는 취득 가능하다.', 29, 13);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?', '마약·대마 중독자 중 수상레저활동을 할 수 없다고 인정되어 대통령령으로 정하는 자는 결격사유에 해당한다.', true, '법상 결격사유에 해당한다.', 30, 13);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 동력수상레저기구 조종면허를 받을 수 없는 결격사유에 대한 설명으로 가장 옳지 않은 것은?', '조종면허 취소 후 1년이 지나지 않은 자는 결격사유에 해당한다.', true, '결격사유 규정에 부합한다.', 31, 13);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?', '조종면허 취소일부터 2년이 지나지 아니한 사람', false, '결격기간은 2년이 아니다.', 32, 14);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?', '마약·향정신성의약품 또는 대마 중독자 중 수상레저활동이 어렵다고 인정되어 대통령령으로 정하는 사람', true, '법상 결격사유에 해당한다.', 33, 14);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?', '14세 미만(제2급의 경우 18세 미만)인 사람', false, '제2급 기준 18세 미만이라는 진술이 틀렸다.', 34, 14);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허의 결격사유로 가장 옳은 것은?', '무면허 조종 위반일부터 3년이 지나지 않은 사람', false, '기간/요건 진술이 맞지 않는다.', 35, 14);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?', '부정행위로 시험 무효 처분을 받은 자는 시험 시행일부터 1년간 응시할 수 없다.', false, '법 기준은 1년이 아니라 2년이다.', 36, 15);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?', '조종면허가 취소된 날부터 1년이 경과하여야 조종면허 시험 응시가 가능하다.', true, '면허 취소 후 제한기간 규정 취지에 부합한다.', 37, 15);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?', '정신질환자로서 전문의가 정상적인 수상레저활동이 어렵다고 인정하면 면허를 받을 수 없다.', true, '결격사유 규정과 부합한다.', 38, 15);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허에 대한 설명으로 가장 옳지 않은 것은?', '무면허 조종자는 위반일부터 1년 경과 후 시험 응시가 가능하다.', true, '해설 기준으로 맞는 진술이다.', 39, 15);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?', '조종능력이 현저히 부족하다고 인정되는 경우', true, '실격사유에 해당한다.', 40, 16);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?', '사고 예방 지시 불이행 또는 시험관 지시 없이 1회 이상 인명구조 시험을 진행하지 않은 경우', false, '기준은 1회가 아니라 2회 이상이다.', 41, 16);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?', '3회 이상 출발지시에도 출발하지 못하거나 응시자 지시불이행 의사를 밝힌 경우', true, '실격사유에 해당한다.', 42, 16);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 일반조종면허 실기시험의 실격사유로 가장 옳지 않은 것은?', '감점 합계가 합격기준에 미달함이 명백한 경우', true, '실격사유에 해당한다.', 43, 16);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?', '안전교육용 형광신호탄 2개 이상을 갖춘 경우', true, '시험장비 기준에 부합한다.', 44, 17);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?', '수심은 20m든 4m든 비상구조조치 1대 이상이면 된다.', false, '비상구조조치 기준은 장비 수량만이 아니라 세부 기준을 충족해야 한다.', 45, 17);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?', '일반조종면허 대상 구간에는 규격에 맞는 시험용 동력수상레저기구 3대 이상을 둔다.', true, '기준 취지에 부합한다.', 46, 17);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 시험대행기관의 실기시험 실격기준으로 가장 옳지 않은 것은?', '요트조종면허 대상 구간에는 규격에 맞는 시험용 요트 2대 이상을 둔다.', true, '기준 취지에 부합한다.', 47, 17);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?', '갱신 유예 사유가 없어진 날부터 3개월 이내 갱신 신청해야 한다.', true, '갱신 규정 취지에 부합한다.', 48, 18);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?', '유예 사유로 정지된 갱신기간 만료 전 단속하면 정지된다.', true, '갱신 관련 제재 규정 취지에 부합한다.', 49, 18);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?', '유예 사유가 남아있는 동안에도 갱신 가능하고, 사유 해소 전에는 갱신 전 기간 안 갱신할 수 있다.', true, '유예 사유 관련 절차 설명 취지에 부합한다.', 50, 18);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '동력수상레저기구 조종면허 갱신과 관련된 설명 중 가장 옳지 않은 것은?', '조종면허의 갱신 기간 연기는 한 번만 할 수 있다.', false, '횟수 제한 규정이 없다.', 51, 18);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?', '기징역·파면·부정한 방법 등으로 면허를 받은 경우 조종면허를 취소해야 한다.', true, '면허 취소 사유에 해당한다.', 52, 20);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?', '술에 취한 상태 조종 등 일정 사유가 있으면 조종면허를 취소할 수 있다.', true, '면허 취소 사유에 해당한다.', 53, 20);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?', '조종면허 정지 기간 중 조종 시 조종면허를 취소하여야 한다.', true, '취소 사유로 본다.', 54, 20);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령·시행규칙 포함)」상 조종면허 취소·정지 설명 중 가장 옳지 않은 것은?', '조종 중 과실로 사람을 사망하게 하고 재산에 중대한 손해를 입힌 경우 면허를 취소해야 한다.', false, '해설 기준으로는 취소 사유가 아니다.', 55, 20);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허 취소·정지 관련 진술', '거짓이나 그 밖의 부정한 방법으로 조종면허를 받은 경우 조종면허를 취소하여야 한다.', true, '법 제17조 등에 따른 필요적 취소 사유에 해당한다.', 56, 22);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허 취소·정지 관련 진술', '조종면허 효력정지 기간에 조종을 한 경우 조종면허를 취소하여야 한다.', true, '필요적 취소 사유에 해당한다.', 57, 22);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허 취소·정지 관련 진술', '조종면허를 받은 자가 동력수상레저기구를 이용하여 살인·강도 등 해양수산부령으로 정하는 범죄행위를 한 경우, 조종면허를 취소하거나 1년의 범위에서 효력을 정지할 수 있다.', true, '임의적 취소·정지 사유에 해당한다.', 58, 22);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허 취소·정지 관련 진술', '조종 중 고의 또는 과실로 사람을 사상하거나 타인 재산에 중대한 손해를 입힌 경우, 조종면허를 취소하거나 3년의 범위에서 효력을 정지할 수 있다.', false, '사상·재산 손해의 효력정지 상한은 1년 범위이다(법 제17조).', 59, 22);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '둘 이상의 처분기준이 모두 면허정지(효력정지)인 경우, 각 처분기준 기간을 단순 합산한 기간으로 한다.', false, '합산이 아니라, 합산을 넘지 않는 범위에서 무거운 처분기준에 그 기준의 2분의 1 범위에서 가중하는 방식이다.', 60, 23);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '면허증을 다른 사람에게 빌려주어 조종하게 한 경우, 해양경찰청장은 조종면허를 반드시 취소하여야 한다.', false, '취소 또는 1년 범위 효력정지 등 임의적 처분이다.', 61, 23);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '일반조종면허와 요트조종면허를 모두 소지한 자에게 처분 사유가 생긴 경우, 위반 당시 이용한 기구의 조종에 필요한 면허에 대해서만 취소·정지처분을 하여야 한다.', true, '복수 면허 시 위반 당시 기구에 해당하는 면허만 처분한다.', 62, 23);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '위반행위가 둘 이상이고 처분기준이 서로 다른 경우, 그중 무거운 처분기준에 따른다.', true, '행정처분 일반기준에 부합한다.', 63, 23);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '처분 대상자의 소재를 알 수 없어 통지할 수 없을 때, 관할 해양경찰서 게시판에 14일간 공고함으로써 통지에 갈음할 수 있다.', true, '공고 통지 요건에 해당한다.', 64, 23);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '위반행위 횟수에 따른 행정처분 기준은 최근 1년간 같은 위반으로 처분받은 경우에 적용한다.', true, '기준 기간은 최근 1년이다.', 65, 23);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허 취소·정지처분(시행규칙 별표6 등) 관련 진술', '위반이 사소한 부주의·오류로 인정되면 처분기간의 2분의 1 범위에서 감경할 수 있다.', true, '참작 감경 규정이 있다.', 66, 23);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 관련 진술', '일반조종면허의 경우 제2급을 취득한 자가 제1급을 취득한 때에는 제2급 조종면허의 효력은 상실된다.', true, '법 제5조 취지.', 67, 25);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 관련 진술', '수상레저활동을 하려는 외국인이 국내에서 개최되는 국제경기대회에 참가하여 수상레저기구를 조종하는 경우에는 조종면허가 없어도 된다.', true, '국제대회 참가 외국인 등 예외 규정 취지.', 68, 25);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 관련 진술', '조종면허 효력정지 기간에 조종을 한 경우 조종면허를 취소하여야 한다.', true, '필요적 취소 사유.', 69, 25);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 관련 진술', '동력수상레저기구를 조종한 경우, 술에 취한 상태임이 인정될 만한 상당한 이유가 있음에도 관계 공무원의 측정에 따르지 않은 행정처분은 1차는 면허정지이고 2차 위반부터 면허취소이다.', false, '측정 불응 등은 1차부터 면허취소 등 중한 처분이 적용되는 유형으로 출제된다.', 70, 25);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허증·시험 관련 진술', '조종면허증의 갱신기간은 면허증 발급일부터 기산하여 7년이 되는 날부터 6개월 이내이다.', true, '법 제12조 취지.', 71, 26);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허증·시험 관련 진술', '조종면허증을 갱신하지 아니한 경우, 갱신기간 만료 다음 날부터 조종면허의 효력이 정지된다.', false, '효력정지는 갱신기간이 만료한 날부터 된다.', 72, 26);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허증·시험 관련 진술', '조종면허가 취소된 자는 취소된 날부터 7일 이내 해양경찰청장에게 면허증을 반납하여야 한다.', true, '반납 의무 규정.', 73, 26);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허증·시험 관련 진술', '약물의 영향으로 정상 조종이 어려울 염려가 있는 상태에서 동력수상레저기구를 조종한 경우 조종면허를 취소하여야 한다.', false, '임의적 취소 또는 1년 범위 효력정지 등이지, 반드시 취소만 하는 구조는 아니다.', 74, 26);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '조종면허증·시험 관련 진술', '조종면허시험에서 부정행위를 한 자는 그 처분이 있는 날부터 3년간 면허시험에 응시할 수 없다.', false, '부정행위 제한기간은 2년이다.', 75, 26);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '필요적 취소·임의적 처분 구분', '면허증을 다른 사람에게 빌려주어 조종하게 한 경우, 조종면허를 반드시 취소하여야 한다.', false, '대여는 임의적 취소·정지(기간 정지 등)에 해당하는 경우가 많다.', 76, 21);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '필요적 취소·임의적 처분 구분', '술에 취한 상태에서 조종을 한 경우, 조종면허를 반드시 취소하여야 한다.', true, '음주 조종 등은 필요적 취소에 해당한다.', 77, 21);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '필요적 취소·임의적 처분 구분', '조종면허를 받은 자가 동력수상레저기구를 이용하여 「해상교통안전법」을 위반한 범죄행위를 한 경우, 반드시 조종면허를 취소하여야 한다.', false, '죄종·요건에 따라 임의적 취소·정지 등으로 다루어지는 경우가 있다.', 78, 21);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 일반 규정 관련 진술', '해양경찰청장은 수상레저안전관리에 관한 기본계획을 10년마다 수립·시행하여야 한다.', false, '기본계획은 5년 단위이다(법 제4조).', 79, 27);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 일반 규정 관련 진술', '만 14세 미만(제1급의 경우 만 19세 미만)인 사람은 동력수상레저기구 조종면허를 받을 수 없다.', false, '제1급은 만 18세 미만이 결격(예외는 대통령령).', 80, 27);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 일반 규정 관련 진술', '거짓이나 그 밖의 부정한 방법으로 조종면허를 받은 경우, 해양경찰청장은 조종면허를 취소하거나 1년의 범위에서 효력을 정지할 수 있다.', false, '부정 취득은 필요적 취소 사유이다.', 81, 27);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」 일반 규정 관련 진술', '동력수상레저기구 조종면허의 최초 갱신기간은 발급일부터 기산하여 7년이 되는 날부터 6개월 이내이다.', true, '법 제12조 취지.', 82, 27);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항규칙·기상제한 관련 진술', '다이빙대·계류장 및 교량으로부터 20미터 이내 구역에서는 10노트 이하의 속력으로 운항하여야 한다.', false, '시행령 등에 따른 서행 구역은 20미터가 아니라 10미터 이내로 규정된다.', 83, 28);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항규칙·기상제한 관련 진술', '안개 등으로 가시거리가 0.5킬로미터 이내로 제한될 때, 레이더 및 VHF를 갖추면 수상레저기구를 운항할 수 있다.', false, '가시거리 0.5km 이하 등에는 예외 없이 활동이 제한된다.', 84, 28);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항규칙·기상제한 관련 진술', '다른 수상레저기구의 진로를 횡단하며 충돌 위험이 있을 때, 다른 기구를 자기의 오른쪽에 둔 기구가 진로를 피하여야 한다.', true, '우현측 기준 피항 취지.', 85, 28);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항규칙·기상제한 관련 진술', '다른 사람이나 기구의 안전을 위협하거나 소음기를 임의로 제거·굉음으로 놀라게 하는 행위를 해서는 아니 된다.', true, '안전·질서 위반 금지.', 86, 28);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항규칙 관련 진술', '안개 등으로 가시거리가 0.5해리 이내로 제한되는 경우에도 수상레저기구를 운항할 수 있다.', false, '기준 거리는 0.5해리가 아니라 0.5킬로미터이다.', 87, 29);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항규칙 관련 진술', '다른 수상레저기구의 진로를 횡단할 때 충돌 위험이 있으면, 다른 기구를 왼쪽에 둔 수상레저기구가 진로를 피하여야 한다.', false, '다른 기구를 오른쪽에 둔 쪽이 피해야 한다.', 88, 30);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항규칙 관련 진술', '안개 등으로 가시거리가 0.5킬로미터 이내로 제한되는 경우에는 수상레저기구를 운항해서는 아니 된다.', true, '법 제22조 등 기상·가시거리 제한.', 89, 30);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항규칙 관련 진술', '다른 수상레저기구를 추월하려는 경우, 추월당하는 기구를 완전히 추월하거나 충분히 멀어질 때까지 그 진로를 방해하여서는 아니 된다.', true, '추월 시 진로 방해 금지.', 90, 31);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항규칙 관련 진술', '다른 수상레저기구와 정면으로 충돌할 위험이 있을 때, 음성·수신호 등으로 알리고 좌현 쪽으로 진로를 피하여야 한다.', false, '정면 충돌 위험 시 우현(오른쪽)으로 피한다.', 91, 31);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '기상특보·가시거리 제한 관련 진술', '수상레저활동 구역에 태풍·풍랑·폭풍해일·호우·대설·강풍 관련 주의보 이상 기상특보가 발표된 경우 수상레저활동을 하여서는 아니 된다.', true, '기상특보 시 활동 제한 취지.', 92, 32);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '기상특보·가시거리 제한 관련 진술', '안개 등으로 가시거리가 0.5킬로미터 이내로 제한되는 경우 수상레저활동을 하여서는 아니 된다.', true, '가시거리 제한 시 원칙적 금지.', 93, 32);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '기상특보·가시거리 제한 관련 진술', '가시거리가 0.5킬로미터 이내로 제한되는 경우, 기상특보발효활동신고를 하면 파도·바람만 이용하는 기구는 활동할 수 있다.', false, '가시거리 제한에는 통상 예외 신고로 활동이 허용되지 않는다.', 94, 32);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항·경계 관련 진술', '다른 수상레저기구와 같은 방향으로 운항할 때 2미터 이내로 근접하여 운항해서는 아니 된다.', true, '근접 운항 금지.', 95, 33);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항·경계 관련 진술', '시각·청각 등 당시 상황에 맞는 모든 수단으로 충돌 위험을 판단할 수 있도록 항상 적절한 경계를 하여야 한다.', true, '경계 의무.', 96, 33);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항·경계 관련 진술', '안개 등으로 가시거리가 0.5킬로미터 이내일 때, 레이더와 VHF를 갖추면 수상레저기구를 운항할 수 있다.', false, '가시거리 제한 시 장비로 예외를 두지 않는다.', 97, 33);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '운항·경계 관련 진술', '앞지르기(추월)하려는 경우, 앞지르기당하는 기구를 완전히 앞지르거나 충분히 멀어질 때까지 진로를 방해해서는 아니 된다.', true, '추월 시 진로 방해 금지.', 98, 33);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '수상레저활동 의무·금지 관련 진술', '수상레저활동을 하려는 자는 구명조끼 등 인명안전에 필요한 장비를 착용하여야 한다.', true, '안전장비 착용 의무.', 99, 34);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '수상레저활동 의무·금지 관련 진술', '출발항으로부터 10킬로미터 이상 떨어진 곳에서 수상레저활동을 하려는 자는 해양경찰관서나 경찰관서에 신고하여야 한다. 다만 「선박의 입항 및 출항 등에 관한 법률」 등에 따른 출입신고를 한 경우에는 그러하지 아니하다.', false, '원거리 신고 기준은 10킬로미터가 아니라 10해리이다(법 제23조).', 100, 34);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '수상레저활동 의무·금지 관련 진술', '수상레저기구 조종자는 정원을 초과하여 사람을 태우고 운항하여서는 아니 된다.', true, '정원 준수.', 101, 34);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '수상레저활동 의무·금지 관련 진술', '해 진 후 30분부터 해 뜨기 전 30분까지는 수상레저활동을 하여서는 아니 된다. 다만 야간운항장비를 갖춘 경우 등 해양수산부령으로 정하는 바에 따른 예외가 있다.', true, '야간 활동 제한과 예외.', 102, 34);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '수상레저활동 의무·금지 관련 진술', '다이빙대·계류장 및 교량으로부터 20미터 이내 구역이나 지정 위험구역에서는 10노트 이하로 운항하고 별도 운항지침을 따라야 한다.', false, '시행령 등에 따르면 해당 서행 구역은 20미터가 아니라 10미터 이내 등으로 규정된다.', 103, 34);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동·사고 신고 관련 진술', '원거리 수상레저활동 신고는 해양경찰관서(파출소)에만 하면 된다.', false, '경찰관서에도 신고할 수 있다.', 104, 35);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동·사고 신고 관련 진술', '사고로 사망·실종·중상해가 발생한 경우의 통지는 해양경찰관서에만 하면 된다.', false, '경찰·소방 관서 등에도 통지할 수 있다.', 105, 35);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동·사고 신고 관련 진술', '사고를 통지하려는 자는 전화·팩스 또는 그 밖의 적절한 방법으로 통지할 수 있다.', true, '통지 방법 규정.', 106, 35);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동·사고 신고 관련 진술', '제1급 조종면허를 소지한 자는 원거리 수상레저활동 신고를 하지 않아도 된다.', false, '면허 종류만으로 신고가 면제되지 않는다.', 107, 35);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동 신고 관련 진술', '활동 지역이 출발항으로부터 10해리 이상 떨어진 곳이면 원거리 수상레저활동 신고 대상이 될 수 있다.', true, '거리 기준은 출발항 기준 10해리.', 108, 36);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동 신고 관련 진술', '「선박의 입항 및 출항 등에 관한 법률」에 따른 출입신고를 한 선박이면, 10해리 이상 나가도 별도의 원거리 수상레저활동 신고가 필요 없다.', true, '법에서 정한 신고 면제 사유.', 109, 36);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '원거리 수상레저활동 신고 관련 진술', '활동 지역이 육지로부터 9해리 이상 떨어졌다면 반드시 원거리 수상레저활동 신고를 하여야 한다.', false, '기준은 육지가 아니라 출발항으로부터의 거리이다.', 110, 36);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.', '0개', true, '법 제37조·제23조. 가·나·다 모두 진술이 틀려 옳은 것은 0개이다.', 111, 37);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.', '1개', false, '정답은 0개이다.', 112, 37);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.', '2개', false, '정답은 0개이다.', 113, 37);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 다음 중 옳은 것은 모두 몇 개인가? (가) 영업구역이 2개 이상의 해양경찰서 관할 또는 시·군·구 관할에 걸쳐 있으면 사업등록은 수상레저사업자 주소지를 관할하는 관청에 해야 한다. (나) 원거리 수상레저활동 신고서는 해양경찰관서 또는 시·군·구청에 신고한다. (다) 출입신고·출항입항 신고를 한 선박도 별도 원거리 신고를 하여야 한다.', '3개', false, '정답은 0개이다.', 114, 37);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)', '1개', false, '㉠·㉡·㉢이 옳지 않은 진술이므로 3개이다(법 제25·26·23조 등).', 115, 38);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)', '2개', false, '정답은 3개이다.', 116, 38);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)', '3개', true, '㉠(효력정지는 제외가 아니라 포함)·㉡(해 진 후 30분~해 뜨기 전 30분)·㉢(10해리)가 법문과 다르다.', 117, 38);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 규정된 내용으로 옳지 않은 것은 모두 몇 개인가? (<보기> ㉠ 무면허 조종 금지 문구, ㉡ 야간 금지 문구, ㉢ 10킬로미터 원거리 신고, ㉣ 사고 통지, ㉤ 약물 등으로 정상 조종 곤란 금지)', '4개', false, '정답은 3개이다.', 118, 38);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)', '1개', false, '시행규칙 제28조에 따라 네 가지 모두 해당 사유에 해당할 수 있어 4개이다.', 119, 39);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)', '2개', false, '정답은 4개이다.', 120, 39);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)', '3개', false, '정답은 4개이다.', 121, 39);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 조종면허를 받아야 할 동력수상레저기구를 무면허로 조종할 수 있는 요건에 해당하는 것은 모두 몇 개인가? (㉠ 동시 감독 3대 이하, ㉡ 견인 안 함, ㉢ 면허시험 관련 조종, ㉣ 제1급·요트면허자와 동승 조종)', '4개', true, '시행규칙 제28조(무면허조종이 허용되는 경우).', 122, 39);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?', '해 진 후 30분부터 해 뜨기 전 30분까지는 수상레저활동을 하여서는 아니 된다. 다만, 야간운항장비를 모두 갖춘 경우에는 운항이 가능하다.', true, '법 제26조 취지와 부합하는 진술이다.', 123, 40);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?', '해양경찰서장 및 해양수산부장관 또는 시장·군수·구청장은 야간운항 허용시간을 조정해야 한다.', false, '해양수산부장관은 야간운항 허용시간 조정 권한 주체에 포함되지 않는다(법 제26조).', 124, 40);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?', '야간 운항장비에는 항해등, 구명부환, 통신기기 등이 포함된다.', true, '시행규칙 등에 따른 야간 운항장비 예시에 부합한다.', 125, 40);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 의거, 야간 수상레저활동에 관한 설명 중 가장 옳지 않은 것은?', '해양수산부령으로 정하는 야간 운항장비를 갖춘 수상레저기구를 이용하는 경우 야간운항이 가능하다.', true, '법 제26조 단서 취지.', 126, 40);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)', '10개', false, '시행규칙 제29조 기준 8개(정답 ③).', 127, 41);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)', '9개', false, '정답은 8개이다.', 128, 41);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)', '8개', true, '시행규칙 제29조(야간 운항장비). 구조용 로프·노는 해당 목록에서 제외되는 경우로 출제된다.', 129, 41);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따라 야간 수상레저활동을 하려는 사람이 갖추어야 하는 운항장비에 해당하는 것은 모두 몇 개인가? (항해등·나침반·야간조난신호장비·통신기기·전등·구조용 로프·소화기·자기점화등·위성항법장치·노)', '7개', false, '정답은 8개이다.', 130, 41);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?', '지방해양경찰청장', false, '제30조에 따르면 해양경찰서장 또는 시장·군수·구청장이 지정할 수 있고, 지방해양경찰청장은 여기에 해당하지 않는다.', 131, 42);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?', '해양경찰서장', true, '해양경찰서장은 금지구역 지정 권한이 있다.', 132, 42);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?', '시장', true, '시장은 지정 권한이 있다.', 133, 42);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저활동 금지구역을 지정할 수 있는 자로 가장 옳지 않은 것은?', '구청장', true, '구청장은 지정 권한이 있다.', 134, 42);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?', '해양경찰서장 또는 시장·군수·구청장', true, '제30조(수상레저활동 금지구역의 지정 등).', 135, 43);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?', '해양경찰서장', false, '시장·군수·구청장과 함께 규정된 지정 주체를 모두 포함한 ①이 가장 옳다.', 136, 43);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?', '시장·군수·구청장', false, '해양경찰서장도 지정 주체이므로 ①이 정답이다.', 137, 43);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저활동 금지구역 지정권자로 가장 옳은 것은?', '지방해양경찰청장', false, '지방해양경찰청장 단독 지정 규정은 없다.', 138, 43);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?', '수상레저기구 조종자의 교체', true, '법 제31조(시정명령) 각 호에 해당한다.', 139, 44);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?', '수상레저활동의 일시정지', true, '제31조 각 호에 해당한다.', 140, 44);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?', '수상레저기구의 압류', false, '압류는 규정된 시정명령 사항이 아니다(제31조).', 141, 44);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 해양경찰서장 또는 시장·군수·구청장이 수상레저활동의 안전을 위하여 필요하다고 인정하면 수상레저활동을 하는 자에게 명할 수 있는 사항에 해당하지 않는 것은?', '수상레저기구 탑승인원의 제한', true, '제31조 제1호에 해당한다.', 142, 44);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)', '해양경찰서장', false, '제33조 문언과 다르다.', 143, 45);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)', '지방해양경찰청장', false, '제33조 문언과 다르다.', 144, 45);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)', '지방해양경찰청장, 해양경찰시장', false, '제33조 문언과 다르다.', 145, 45);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 관계 행정기관의 협조에 관한 사항이다. 괄호 안에 들어갈 내용으로 가장 올바른 말은? (시·도지사 등이 내수면 안전관리를 위해 ( )에게 경찰공무원 파견 등을 요청할 수 있다.)', '해양경찰청장, 지방해양경찰청장 또는 해양경찰서장', true, '제33조(관계 행정기관의 협조).', 146, 45);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?', '영업구역이 둘 이상의 해양경찰서장의 관할 지역에 걸쳐 있는 경우 수상레저기구를 주로 매어두는 장소를 관할하는 지방해양경찰청장에게 등록하여야 한다.', false, '지방해양경찰청장이 아니라 해양경찰서장 또는 시장·군수·구청장에게 등록한다(법 제37조).', 147, 46);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?', '무동력 수상레저기구만을 이용하여 수상레저사업을 하는 경우에는 수상레저사업자 또는 그 종사자 중 1명 이상이 제2급조종면허 이상의 자격을 갖추기만 하면 된다.', true, '등록기준 취지에 부합한다.', 148, 46);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?', '수상레저기구 탑승정원의 110% 이상에 해당하는 수의 구명조끼를 갖추어야 하고 탑승정원의 10%는 소아용으로 한다.', true, '시행규칙 제32조 등 취지.', 149, 46);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업의 등록기준에 관한 설명으로 가장 옳지 않은 것은?', '비상구조선은 탑승정원이 3명 이상, 속도가 20노트 이상이어야 한다.', true, '시행규칙 제32조 등 취지.', 150, 46);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?', '275', false, '110+10+165+15=300(시행규칙 제32조).', 151, 47);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?', '300', true, '구명조끼 110%·10% 소아용, 탑승정원 150명일 때 165·15벌 등 해설 합산.', 152, 47);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?', '315', false, '정답은 300이다.', 153, 47);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에서 정하는 수상레저사업 등록기준 중 인명구조용 장비에 관한 설명이다. 괄호에 들어갈 숫자를 모두 합한 것으로 가장 옳은 것은?', '320', false, '정답은 300이다.', 154, 47);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)', '55', false, '3+20+4+30=57(시행규칙 제32조).', 155, 48);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)', '56', false, '정답은 57이다.', 156, 48);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)', '57', true, '비상구조선 3명·20노트, 구명부환 4명 이상 30% 등.', 157, 48);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (비상구조선 탑승·속도, 구명부환 비율 등)', '58', false, '정답은 57이다.', 158, 48);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)', '32', false, '4+30+4+2+2=42(시행규칙 제32조).', 159, 49);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)', '36', false, '정답은 42이다.', 160, 49);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)', '40', false, '정답은 42이다.', 161, 49);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업 등록기준에 대한 설명이다. 괄호 안에 들어갈 숫자의 합으로 가장 옳은 것은? (㉠ 구명부환·%, ㉡ 예비용 노, ㉢ 통신장비·해리)', '42', true, '4+30+4+2+2=42.', 162, 49);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?', '래프팅용 수상레저기구만을 이용하여 수상레저사업을 하는 경우에는 수상레저사업자 또는 그 종사자 중 1명 이상이 2급 조종면허 이상의 자격을 갖추기만 하면 된다.', false, '래프팅만 이용 시 조종면허 확보 의무가 면제되는 등 기준과 다르다(시행규칙 제32조).', 163, 50);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?', '해수면에서 수상레저사업을 경영하려는 자는 공유수면의 점용 또는 사용의 허가 등에 관한 서류를 관할 해양경찰서장에게 제출하여야 한다.', true, '절차 진술에 부합한다.', 164, 50);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?', '조종면허를 갖고서 수상레저사업장에 종사하고 있는 사람은 해당 수상레저사업장에 종사하고 있는 기간 동안 다른 수상레저사업장에 종사하여서는 아니 된다.', true, '겸직 제한 취지.', 165, 50);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업의 등록기준에 관한 내용이다. 가장 옳지 않은 것은?', '비상구조선은 수상레저사업자가 해당 수상레저사업에 사용되는 수상레저기구 중에서 정하여 사용하되, 지정된 비상구조선은 사업장 구역의 순시와 사고 발생 시 인명구조를 위하여 사용하여야 한다.', true, '비상구조선 운용 취지.', 166, 50);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?', '영업구역 두 곳을 관할하는 지방해양경찰청장 또는 해양경찰청장', false, '법 제37조에 따르면 기구를 주로 매어두는 장소를 관할하는 해양경찰서장 또는 시장·군수·구청장이다.', 167, 51);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?', '수상레저사업자 주소지를 관할하는 해양경찰서장 또는 시장·군수·구청장', false, '주소지 관할이 아니다.', 168, 51);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?', '수상레저사업장 소재지를 관할하는 해양경찰서장 또는 시장·군수·구청장', false, '사업장 소재지가 아니라 주로 매어두는 장소 관할이다.', 169, 51);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」에 따른 수상레저사업 등록 시 영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 사업등록을 해야 하는 관할로 가장 옳은 것은?', '수상레저사업에 사용되는 수상레저기구를 주로 매어두는 장소를 관할하는 해양경찰서장 또는 시장·군수·구청장', true, '법 제37조(수상레저사업의 등록 등).', 170, 51);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?', '수상레저기구를 빌려주는 사업 또는 판매하는 사업이다.', false, '판매 사업은 해당 정의에 포함되지 않는다.', 171, 52);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?', '영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 지방 해양경찰청장 또는 시·도지사에게 등록한다.', false, '법 제37조에 따른 관할이 아니다.', 172, 52);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?', '수상레저사업 등록취소권자는 해양경찰서장 또는 시장·군수·구청장이다.', true, '등록·취소 등 관할 취지에 부합한다.', 173, 52);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 대한 설명으로 가장 옳은 것은?', '수상레저사업자 또는 그 종사자가 고의로 사람을 사상한 때에는 반드시 수상레저사업 등록을 취소하여야 한다.', false, '반드시 취소가 아니라 취소·정지 등 임의적 처분이 될 수 있다.', 174, 52);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?', '영업구역이 내수면인 경우 해당 지역을 관할하는 해양경찰서장 또는 시장·군수·구청장에게 등록해야 한다.', false, '내수면은 시장·군수·구청장에게 등록한다(법 제37조).', 175, 53);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?', '영업구역이 둘 이상의 해양경찰서장 또는 시장·군수·구청장의 관할 지역에 걸쳐 있는 경우 수상레저기구를 주로 매어두는 장소를 관할하는 지방해양경찰청장 또는 시장·군수·구청장에게 등록해야 한다.', false, '지방해양경찰청장이 아니라 해양경찰서장 또는 시장·군수·구청장이다.', 176, 53);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?', '피성년후견인은 수상레저사업 등록을 할 수 없다.', true, '결격 사유에 해당한다.', 177, 53);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법」상 수상레저사업에 관한 설명으로 가장 옳은 것은?', '수상레저기구를 빌려주거나 판매하는 사업은 수상레저사업에 해당된다.', false, '판매는 수상레저사업 정의에 포함되지 않는다.', 178, 53);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?', '수상레저사업의 등록 유효기간은 10년으로 하되, 10년 미만으로 영업하려는 경우에는 해당 영업기간을 등록 유효기간으로 한다.', true, '유효기간 규정에 부합한다.', 179, 54);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?', '수상레저사업자가 등록된 사업기간 중에 휴업하거나 폐업하려는 경우에는 해양경찰서장 또는 시·도지사에게 신고하여야 한다.', false, '시·도지사가 아니라 해양경찰서장 또는 시장·군수·구청장에게 신고한다(법 제41조).', 180, 54);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?', '해양경찰서장은 영업구역이 해수면인 수상레저사업자가 거짓이나 그 밖의 부정한 방법으로 수상레저사업을 등록한 경우 등록을 취소하여야 한다.', true, '등록 취소 사유에 해당한다.', 181, 54);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업에 관한 설명으로 가장 옳지 않은 것은?', '「수상레저안전법」을 위반하여 징역 이상의 실형을 선고받고 그 집행이 끝나거나 집행이 면제된 날부터 2년이 지나지 아니한 사람은 수상레저사업 등록을 할 수 없다.', true, '등록 결격 취지.', 182, 54);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?', '수상레저기구 안에서 술을 판매·제공하거나 수상레저기구 사업자가 수상레저기구 안으로 이를 반입하도록 하는 행위', false, '법 제44조는 이용자가 반입하도록 하는 경우이지 사업자가 반입시키는 표현으로 한정되지 않는다.', 183, 55);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?', '수상레저사업자 또는 그 종사자의 고의 또는 과실로 사람을 사상한 행위', false, '등록취소 등 사유에 해당할 수 있으나 제44조 각호의 ‘금지행위’ 문언과 동일하게 보기 어렵다.', 184, 55);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?', '공유수면의 점용 또는 사용 허가 기간 만료 이후에도 사업을 계속하는 행위', false, '등록취소 사유에 가깝다.', 185, 55);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 금지행위에 해당하는 것으로 가장 옳은 것은?', '대통령령으로 정하는 폭발물·인화물질 등의 위험물을 이용자가 타고 있는 수상레저기구로 반입·운송하는 행위', true, '법 제44조 제1항제6호에 해당한다.', 186, 55);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)', '없음', false, '제44조와 대조 시 정답은 3개로 보는 것이 타당하다(㉡·㉣·㉥ 등).', 187, 56);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)', '1개', false, '해설 참고.', 188, 56);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)', '2개', false, '해설 참고.', 189, 56);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '「수상레저안전법(시행령 및 시행규칙 포함)」상 수상레저사업자와 그 종사자의 금지행위에 해당하는 것은 모두 몇 개인가? (㉠~㉥ 보기)', '3개', true, '정원 초과(㉡), 위험물 반입(㉣), 비상구조선 목적 외 사용(㉥) 등 제44조 각호에 해당하는지 해설서 기준으로 판단한다.', 190, 56);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '다음은 해양경찰의 변천사를 설명한 것이다. ( ) 안에 들어갈 말을 차례로 나열한 것은?
+
+( ㉠ )년 12월 23일\\uB0B4\\uBB34\\uBD80 치안국 소속 해양경찰대로 발족되어 영해경비, 어업자원보호 임무를 수행하다가, 1955년 상공부 해무청 소속으로 바뀌어 해양경비 임무 등을 수행하였다.
+
+1962년 5월 1일에는 다시\\uB0B4\\uBB34\\uBD80 소속으로 복귀하여 해상에서 경찰에 관한 사무와 해난구조와 해양오염에 관한 사무를 관장하기 시작하다가 1991년 8월에는 경찰법 제정에 의하여 경찰청 소속기관으로 편입되었다가, ( ㉡ )년 8월 8일에는 해양수산부 발족과 함께 외청(중앙행정관청)으로 독립하였다.', '㉠ 1953, ㉡ 1996', true, '정답 ①. ㉠ 1953년, ㉡ 1996년(내무부 치안국 소속 해양경찰대 발족일·해양수산부 발족과 함께 외청 독립일).', 191, 301);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '다음은 해양경찰의 변천사를 설명한 것이다. ( ) 안에 들어갈 말을 차례로 나열한 것은?
+
+( ㉠ )년 12월 23일\\uB0B4\\uBB34\\uBD80 치안국 소속 해양경찰대로 발족되어 영해경비, 어업자원보호 임무를 수행하다가, 1955년 상공부 해무청 소속으로 바뀌어 해양경비 임무 등을 수행하였다.
+
+1962년 5월 1일에는 다시\\uB0B4\\uBB34\\uBD80 소속으로 복귀하여 해상에서 경찰에 관한 사무와 해난구조와 해양오염에 관한 사무를 관장하기 시작하다가 1991년 8월에는 경찰법 제정에 의하여 경찰청 소속기관으로 편입되었다가, ( ㉡ )년 8월 8일에는 해양수산부 발족과 함께 외청(중앙행정관청)으로 독립하였다.', '㉠ 1950, ㉡ 1993', false, '연도 조합이 변천사와 맞지 않는다.', 192, 301);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '다음은 해양경찰의 변천사를 설명한 것이다. ( ) 안에 들어갈 말을 차례로 나열한 것은?
+
+( ㉠ )년 12월 23일\\uB0B4\\uBB34\\uBD80 치안국 소속 해양경찰대로 발족되어 영해경비, 어업자원보호 임무를 수행하다가, 1955년 상공부 해무청 소속으로 바뀌어 해양경비 임무 등을 수행하였다.
+
+1962년 5월 1일에는 다시\\uB0B4\\uBB34\\uBD80 소속으로 복귀하여 해상에서 경찰에 관한 사무와 해난구조와 해양오염에 관한 사무를 관장하기 시작하다가 1991년 8월에는 경찰법 제정에 의하여 경찰청 소속기관으로 편입되었다가, ( ㉡ )년 8월 8일에는 해양수산부 발족과 함께 외청(중앙행정관청)으로 독립하였다.', '㉠ 1951, ㉡ 1992', false, '연도 조합이 변천사와 맞지 않는다.', 193, 301);
+  insert into public.quiz_questions (unit_id, question, choice_text, answer, explanation, sort_order, pack_no) values (uid, '다음은 해양경찰의 변천사를 설명한 것이다. ( ) 안에 들어갈 말을 차례로 나열한 것은?
+
+( ㉠ )년 12월 23일\\uB0B4\\uBB34\\uBD80 치안국 소속 해양경찰대로 발족되어 영해경비, 어업자원보호 임무를 수행하다가, 1955년 상공부 해무청 소속으로 바뀌어 해양경비 임무 등을 수행하였다.
+
+1962년 5월 1일에는 다시\\uB0B4\\uBB34\\uBD80 소속으로 복귀하여 해상에서 경찰에 관한 사무와 해난구조와 해양오염에 관한 사무를 관장하기 시작하다가 1991년 8월에는 경찰법 제정에 의하여 경찰청 소속기관으로 편입되었다가, ( ㉡ )년 8월 8일에는 해양수산부 발족과 함께 외청(중앙행정관청)으로 독립하였다.', '㉠ 1952, ㉡ 1995', false, '연도 조합이 변천사와 맞지 않는다.', 194, 301);
 end $$;
 
 insert into public.quiz_settings (key, value) values ('excluded_pack_nos', '[17, 19, 21, 25, 26, 27, 31, 32, 33, 45, 47, 48, 49, 56]'::jsonb) on conflict (key) do update set value = EXCLUDED.value, updated_at = now();

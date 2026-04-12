@@ -62,7 +62,6 @@ def write_static_templates() -> None:
                 "question_sort",
                 "question",
                 "choice_text",
-                "body",
                 "answer",
                 "explanation",
                 "is_active",
@@ -78,7 +77,6 @@ def write_static_templates() -> None:
                 "0",
                 "다음은 해양경찰의 변천사를 설명한 것이다. ( ) 안에 들어갈 말은?",
                 "㉠ 1953 ㉡ 1996",
-                "문제: …\n\n선지: …",
                 "TRUE",
                 "정답 ①.",
                 "true",
@@ -164,7 +162,7 @@ def build_xlsx() -> Path | None:
             v = rowdict.get(h, "")
             wsq.cell(row=ri, column=ci, value=v).alignment = Alignment(wrap_text=True, vertical="top")
     wsq.freeze_panes = "A2"
-    widths = {"id": 38, "unit_id": 38, "question": 50, "choice_text": 22, "body": 60, "explanation": 40}
+    widths = {"id": 38, "unit_id": 38, "question": 50, "choice_text": 22, "explanation": 40}
     for ci, h in enumerate(headers, start=1):
         letter = get_column_letter(ci)
         wsq.column_dimensions[letter].width = min(widths.get(h, 16), 60)

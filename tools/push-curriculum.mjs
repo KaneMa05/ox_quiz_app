@@ -74,7 +74,6 @@ function rowQuestion(subject, unitKey, qi, q, unitId) {
     unit_id: unitId,
     question: q.question ?? "",
     choice_text: q.choice_text ?? "",
-    body: q.body ?? "",
     answer: !!q.answer,
     explanation: q.explanation ?? null,
     sort_order: qi,

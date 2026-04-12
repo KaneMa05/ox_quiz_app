@@ -48,10 +48,9 @@ def main() -> None:
         " ('c2ab0d5f-6c16-5b44-84ea-84008e16d67d'::uuid, '4767fbe6-ca22-5df3-8aa2-fb8abc795de3'::uuid, 'bcb924b4-00dc-5910-96ce-c6fa808ea6d4'::uuid, '해양경찰의 작용', 1, true);"
     )
     for i, (_c, st, a, ex) in enumerate(opts):
-        body = "문제: " + stem + "\n\n선지: " + st
         lines.append(
-            "insert into public.quiz_questions (id, unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no, is_active) values ("
-            f"'{qids[i]}'::uuid, '{uid}'::uuid, {dq('q', stem)}, {dq('c', st)}, {dq('b', body)}, {str(a).lower()}, {dq('e', ex)}, {i}, 301, true);"
+            "insert into public.quiz_questions (id, unit_id, question, choice_text, answer, explanation, sort_order, pack_no, is_active) values ("
+            f"'{qids[i]}'::uuid, '{uid}'::uuid, {dq('q', stem)}, {dq('c', st)}, {str(a).lower()}, {dq('e', ex)}, {i}, 301, true);"
         )
     out = pathlib.Path(__file__).resolve().parent / "_tmp_mdp_sync.sql"
     out.write_text("\n".join(lines), encoding="utf-8")

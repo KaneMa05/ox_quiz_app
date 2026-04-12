@@ -16,7 +16,14 @@ def esc_sql(s: str) -> str:
     return s.replace("\\", "\\\\").replace("'", "''")
 
 
-def parse_q_line(line: str) -> tuple[int, str, str, str, bool, str, str] | None:
+def extract_mdp_stem(text: str) -> str | None:
+    m = re.search(r"const\s+MDP_HISTORY_19G01_STEM\s*=\s*`([\s\S]*?)`;", text)
+    if m:
+        return m.group(1)
+    return None
+
+
+def parse_q_line(line: str, stem_aliases: dict[str, str]) -> tuple[int, str, str, str, bool, str] | None:
     line = line.strip()
     if not line.startswith("q("):
         return None
@@ -53,6 +60,16 @@ def parse_q_line(line: str) -> tuple[int, str, str, str, bool, str, str] | None:
         i = j
         return v
 
+    def read_ident() -> str:
+        nonlocal i
+        skip_ws()
+        j = i
+        while j < n and (s[j].isalnum() or s[j] == "_"):
+            j += 1
+        ident = s[i:j]
+        i = j
+        return ident
+
     def read_string() -> str:
         nonlocal i
         skip_ws()
@@ -88,7 +105,14 @@ def parse_q_line(line: str) -> tuple[int, str, str, str, bool, str, str] | None:
 
     pack = read_int()
     expect_comma()
-    stem = read_string()
+    skip_ws()
+    if i < n and s[i] == '"':
+        stem = read_string()
+    else:
+        ident = read_ident()
+        if ident not in stem_aliases:
+            return None
+        stem = stem_aliases[ident]
     expect_comma()
     choice = read_string()
     expect_comma()
@@ -100,8 +124,7 @@ def parse_q_line(line: str) -> tuple[int, str, str, str, bool, str, str] | None:
     skip_ws()
     if i < n:
         raise ValueError(f"trailing junk at {i}: {s[i : i + 40]!r}")
-    body = f"문제: {stem}\n\n선지: {statement}"
-    return (pack, stem, choice, statement, answer, explanation, body)
+    return (pack, stem, choice, statement, answer, explanation)
 
 
 def parse_excluded_pack_nos(text: str) -> list[int]:
@@ -118,13 +141,17 @@ def parse_excluded_pack_nos(text: str) -> list[int]:
 
 def main() -> None:
     text = DATA_JS.read_text(encoding="utf-8")
-    rows: list[tuple[int, str, str, str, bool, str, str]] = []
+    stem_aliases: dict[str, str] = {}
+    mdp = extract_mdp_stem(text)
+    if mdp is not None:
+        stem_aliases["MDP_HISTORY_19G01_STEM"] = mdp
+    rows: list[tuple[int, str, str, bool, str]] = []
     for raw in text.splitlines():
-        parsed = parse_q_line(raw)
+        parsed = parse_q_line(raw, stem_aliases)
         if not parsed:
             continue
-        pack, stem, choice, statement, answer, explanation, body = parsed
-        rows.append((pack, stem, statement, body, answer, explanation))
+        pack, stem, _choice, statement, answer, explanation = parsed
+        rows.append((pack, stem, statement, answer, explanation))
 
     lines: list[str] = [
         "-- 자동 생성: python tools/gen-seed-sql.py",
@@ -154,17 +181,16 @@ def main() -> None:
         "  insert into public.quiz_subjects (name, sort_order) values ('해사법규', 0) returning id into sid;",
         "  insert into public.quiz_units (subject_id, parent_unit_id, name, sort_order) values (sid, null, '수상레저안전법', 0) returning id into uid;",
     ]
-    for ord_i, (pack, stem, statement, body, answer, explanation) in enumerate(rows):
+    for ord_i, (pack, stem, statement, answer, explanation) in enumerate(rows):
         q_esc = esc_sql(stem)
         c_esc = esc_sql(statement)
-        b = esc_sql(body)
         e = esc_sql(explanation)
         a = "true" if answer else "false"
         pk = str(int(pack)) if pack is not None else "null"
         lines.append(
             "  insert into public.quiz_questions "
-            "(unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no) "
-            f"values (uid, '{q_esc}', '{c_esc}', '{b}', {a}, '{e}', {ord_i}, {pk});"
+            "(unit_id, question, choice_text, answer, explanation, sort_order, pack_no) "
+            f"values (uid, '{q_esc}', '{c_esc}', {a}, '{e}', {ord_i}, {pk});"
         )
     lines.extend(["end $$;", ""])
 

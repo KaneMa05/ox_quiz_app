@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OX 퀴즈 — 문제 입력</title>
+    <style>
+      :root {
+        font-family: system-ui, sans-serif;
+        background: #0f1419;
+        color: #e7ecf3;
+      }
+      body {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 1.25rem;
+      }
+      h1 {
+        font-size: 1.15rem;
+        font-weight: 600;
+      }
+      label {
+        display: block;
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+        color: #9aa7b4;
+      }
+      input[type="text"],
+      input[type="password"],
+      input[type="number"],
+      select,
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 0.25rem;
+        padding: 0.5rem 0.6rem;
+        border-radius: 6px;
+        border: 1px solid #2a3542;
+        background: #151c24;
+        color: #e7ecf3;
+      }
+      textarea {
+        min-height: 5rem;
+        resize: vertical;
+      }
+      .row {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        margin-top: 0.5rem;
+      }
+      .row label {
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #e7ecf3;
+      }
+      button {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: none;
+        background: #2563eb;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #334155;
+      }
+      button.danger {
+        background: #b91c1c;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      #msg {
+        margin-top: 0.75rem;
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+      }
+      #msg.ok {
+        color: #4ade80;
+      }
+      #msg.err {
+        color: #f87171;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        font-size: 0.8rem;
+      }
+      th,
+      td {
+        border: 1px solid #2a3542;
+        padding: 0.35rem 0.45rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #1a222c;
+      }
+      .muted {
+        color: #9aa7b4;
+        font-size: 0.8rem;
+        margin-top: 1.5rem;
+      }
+      hr {
+        border: none;
+        border-top: 1px solid #2a3542;
+        margin: 1.5rem 0;
+      }
+      .btnRow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        margin-top: 0.75rem;
+      }
+      .btnRow button {
+        margin-top: 0;
+      }
+      .dbPreview {
+        margin-top: 0.25rem;
+        min-height: 5rem;
+        max-height: 28rem;
+        overflow: auto;
+        padding: 0.55rem 0.65rem;
+        border-radius: 6px;
+        border: 1px solid #2a3542;
+        background: #0b0f14;
+        color: #c8d4e0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.72rem;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .dbPreview.empty {
+        color: #6b7c8f;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  </head>
+  <body>
+    <h1>문제 입력 · 삭제</h1>
+    <p class="muted">Supabase에 연결된 단원에 선지(OX) 한 행을 추가하거나 삭제합니다. 삭제는 복구되지 않습니다.</p>
+
+    <label for="adminSecret">관리 비밀번호 (Vercel의 OX_ADMIN_SECRET)</label>
+    <input id="adminSecret" type="password" autocomplete="off" placeholder="저장: 브라우저 세션 동안만" />
+
+    <label for="unitSelect">단원</label>
+    <select id="unitSelect"></select>
+
+    <label for="packNo">pack_no (선택, 숫자만 · 원본 4선지·수동 추가 공통)</label>
+    <input id="packNo" type="number" />
+
+    <hr />
+
+    <h2 style="font-size:1rem;margin-bottom:0">원본 붙여넣기 (4지선다 → DB 4행)</h2>
+    <p class="muted">
+      지문 다음 줄부터 ①②③④ 선지, 그 다음 <code>해설 답 ④</code> 형태의 정답 표기, 이어서 해설 본문을 붙여넣으면 한 번에 4개의
+      <code>quiz_questions</code> 행이 들어갑니다. 해설 안에 다시 줄 시작 <code>①</code>~<code>④</code>가 순서대로 있으면,
+      그 구간을 선지별로 나누어 각 행 <code>explanation</code>에 넣고, 저장 시 줄 앞 번호(①~④)는 제거합니다(앞 문단은 네 행
+      공통). 문제 가공으로 JSON 미리보기.
+      (지문에 「가장 옳지 않은」류가 있으면 정답 번호 선지는 X, 나머지는 O. <code>pack_no</code>는 네 행 공통.)
+    </p>
+    <label for="rawBlock">문제 원본</label>
+    <textarea id="rawBlock" rows="14" placeholder="지문…&#10;① …&#10;② …&#10;③ …&#10;④ …&#10;&#10;해설 답 ④&#10;해설 본문…"></textarea>
+    <div class="btnRow">
+      <button type="button" class="secondary" id="btnProcessRaw">문제 가공</button>
+      <button type="button" id="btnAddFromRaw">원본에서 4선지 DB 추가</button>
+    </div>
+
+    <label>DB 양식 미리보기 (<code>quiz_questions</code>에 넣을 값 4행)</label>
+    <pre id="dbPreview" class="dbPreview empty" role="region" aria-label="DB 양식 미리보기">문제 가공을 누르면 여기에 JSON으로 표시됩니다.</pre>
+
+    <hr />
+
+    <h2 style="font-size:1rem;margin-bottom:0">추가 (수동)</h2>
+
+    <label for="question">지문 (question)</label>
+    <textarea id="question" placeholder="지문 전체"></textarea>
+
+    <label for="choice">선지 본문 (choice_text)</label>
+    <textarea id="choice" placeholder="이 선지에 대한 O/X"></textarea>
+
+    <div class="row">
+      <label><input type="radio" name="ans" value="o" checked /> O (참)</label>
+      <label><input type="radio" name="ans" value="x" /> X (거짓)</label>
+    </div>
+
+    <label for="explanation">해설 (선택)</label>
+    <textarea id="explanation"></textarea>
+
+    <label for="sortOrder">sort_order (비우면 해당 단원 맨 뒤)</label>
+    <input id="sortOrder" type="number" />
+
+    <button type="button" id="btnAdd">문제 추가</button>
+
+    <hr />
+
+    <h2 style="font-size:1rem;margin-bottom:0">삭제</h2>
+    <p class="muted">단원을 고른 뒤 목록을 불러와 행을 삭제합니다.</p>
+    <button type="button" class="secondary" id="btnLoad">이 단원 문항 불러오기</button>
+    <div id="listWrap"></div>
+
+    <p class="muted">
+      로컬: <code>vercel dev</code> 후 이 페이지를 열고, Vercel 환경변수에 <code>OX_ADMIN_SECRET</code> ·
+      <code>SUPABASE_SERVICE_ROLE_KEY</code> · <code>SUPABASE_URL</code>(또는 PROJECT_ID)를 설정하세요.
+    </p>
+
+    <div id="msg"></div>
+
+    <script>
+      const msg = document.getElementById("msg");
+      const unitSelect = document.getElementById("unitSelect");
+      const listWrap = document.getElementById("listWrap");
+
+      function setMsg(text, cls) {
+        msg.textContent = text || "";
+        msg.className = cls || "";
+      }
+
+      function getSecret() {
+        const k = "ox_admin_secret_v1";
+        const el = document.getElementById("adminSecret");
+        const v = (el && el.value.trim()) || sessionStorage.getItem(k) || "";
+        if (v) sessionStorage.setItem(k, v);
+        return v;
+      }
+
+      const CIRC = ["①", "②", "③", "④"];
+
+      function collapseWs(s) {
+        return String(s || "")
+          .replace(/\r\n/g, "\n")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      /** 해설 문자열에서 각 줄 앞의 ①~④와 뒤따르는 공백 제거(DB 저장용). */
+      function stripCircledFromExplanationLines(s) {
+        if (s == null) return null;
+        const t = String(s).replace(/\r\n/g, "\n").trim();
+        if (!t) return null;
+        const out = t
+          .split("\n")
+          .map((ln) => ln.replace(/^\s*[①②③④]\s*/u, ""))
+          .join("\n")
+          .trim();
+        return out || null;
+      }
+
+      /** 지문에 「옳지 않은 / 틀린 …」이 있으면 정답 번호는 거짓 진술(=X) 한 개다. */
+      function stemImpliesNegativeMc(stem) {
+        const t = String(stem || "");
+        return /가장\s*옳지\s*않은|옳지\s*않은\s*것|틀린\s*것|잘못된\s*것|맞지\s*않은|그릇된\s*것|부적절한\s*것|옳지\s*않은\s*내용|틀린\s*내용/u.test(t);
+      }
+
+      function answerTokenToIndex(tok) {
+        const x = String(tok || "").trim();
+        const idxCirc = CIRC.indexOf(x);
+        if (idxCirc >= 0) return idxCirc;
+        if (/^[1-4]$/.test(x)) return Number(x) - 1;
+        const fw = { "\uFF11": 0, "\uFF12": 1, "\uFF13": 2, "\uFF14": 3 };
+        if (fw[x] != null) return fw[x];
+        throw new Error("해설 답 번호를 ①~④ 또는 1~4로 읽을 수 없습니다: " + x);
+      }
+
+      /**
+       * @returns {{ stem: string, choices: string[], correctIndex: number, explanation: string, isNegative: boolean }}
+       */
+      function parseRawFourChoiceBlock(raw) {
+        const text = String(raw || "").replace(/\r\n/g, "\n").trim();
+        if (!text) throw new Error("원본이 비어 있습니다.");
+
+        const ansRe = /(?:^|\n)\s*해설\s*답\s*([①②③④1-4\uFF11-\uFF14])\s*/;
+        const am = text.match(ansRe);
+        if (!am) throw new Error('「해설 답」줄(예: 해설 답 ④)을 찾을 수 없습니다.');
+
+        const head = text.slice(0, am.index).trim();
+        const explanation = text.slice(am.index + am[0].length).trim();
+        const correctIndex = answerTokenToIndex(am[1]);
+
+        const choiceRe = /^([\s\S]*?)①([\s\S]*?)②([\s\S]*?)③([\s\S]*?)④([\s\S]*)$/;
+        const cm = head.match(choiceRe);
+        if (!cm) throw new Error("①②③④가 순서대로 있는지 확인하세요. (첫 선지는 ①부터)");
+
+        const stem = collapseWs(cm[1]);
+        const choices = [collapseWs(cm[2]), collapseWs(cm[3]), collapseWs(cm[4]), collapseWs(cm[5])];
+        if (choices.some((c) => !c)) throw new Error("①~④ 선지 본문이 비어 있는 항목이 있습니다.");
+
+        const isNegative = stemImpliesNegativeMc(stem);
+        return { stem, choices, correctIndex, explanation, isNegative };
+      }
+
+      function oxAnswerForRow(isNegative, correctIndex, rowIndex) {
+        return isNegative ? rowIndex !== correctIndex : rowIndex === correctIndex;
+      }
+
+      /**
+       * 해설 본문에서 줄 시작 ①②③④ … 순서 블록을 찾아 선지별로 나눈다.
+       * @returns {{ usePerChoice: boolean, perRow: (string|null)[]|null }}
+       */
+      function splitExplanationPerChoice(fullExplanation) {
+        const full = String(fullExplanation || "").replace(/\r\n/g, "\n").trim();
+        if (!full) return { usePerChoice: false, perRow: null, preamble: "" };
+
+        const re = /(?:^|\n)\s*([①②③④])\s*/g;
+        const hits = [];
+        let m;
+        while ((m = re.exec(full))) {
+          const idx = CIRC.indexOf(m[1]);
+          if (idx < 0) continue;
+          hits.push({ idx, blockStart: m.index, afterMarker: m.index + m[0].length });
+        }
+
+        let seqStart = -1;
+        for (let s = 0; s <= hits.length - 4; s++) {
+          if (hits[s].idx !== 0) continue;
+          let ok = true;
+          for (let k = 1; k < 4; k++) {
+            if (hits[s + k].idx !== k) {
+              ok = false;
+              break;
+            }
+          }
+          if (ok) {
+            seqStart = s;
+            break;
+          }
+        }
+
+        if (seqStart < 0) return { usePerChoice: false, perRow: null, preamble: "" };
+
+        const h = hits.slice(seqStart, seqStart + 4);
+        const preamble = full.slice(0, h[0].blockStart).trim();
+        const rawBodies = [];
+        for (let i = 0; i < 4; i++) {
+          const from = h[i].afterMarker;
+          const to = i < 3 ? h[i + 1].blockStart : full.length;
+          rawBodies.push(full.slice(from, to).trim());
+        }
+
+        const perRow = rawBodies.map((body, i) => {
+          const parts = [];
+          if (preamble) parts.push(preamble);
+          if (body) parts.push(body);
+          const out = parts.join("\n\n").trim();
+          return out || null;
+        });
+        return { usePerChoice: true, perRow, preamble };
+      }
+
+      /** @param {{ stem: string, choices: string[], correctIndex: number, explanation: string, isNegative: boolean }} parsed */
+      function buildFourQuestionRows(parsed, unit_id, pack_no) {
+        const split = splitExplanationPerChoice(parsed.explanation);
+        const fallback = parsed.explanation ? parsed.explanation : null;
+        const rows = [];
+        for (let i = 0; i < 4; i++) {
+          let explanation =
+            split.usePerChoice && split.perRow
+              ? split.perRow[i] ?? (split.preamble ? split.preamble : null) ?? fallback
+              : fallback;
+          explanation = stripCircledFromExplanationLines(explanation);
+          rows.push({
+            unit_id: unit_id || "",
+            question: parsed.stem,
+            choice_text: parsed.choices[i],
+            answer: oxAnswerForRow(parsed.isNegative, parsed.correctIndex, i),
+            explanation,
+            pack_no: pack_no != null ? pack_no : null,
+            is_active: true,
+          });
+        }
+        return { rows, explanationWasSplit: !!(split.usePerChoice && split.perRow) };
+      }
+
+      function setDbPreviewFromParsed(parsed, unit_id, pack_no) {
+        const pre = document.getElementById("dbPreview");
+        const { rows, explanationWasSplit } = buildFourQuestionRows(parsed, unit_id, pack_no);
+        const meta = [];
+        meta.push(
+          "// " +
+            (parsed.isNegative
+              ? "「옳지 않은」형: 해설 답 번호 → answer false, 나머지 선지 → true"
+              : "「옳은」형: 해설 답 번호 → answer true, 나머지 선지 → false") +
+            " · 해설 답 " +
+            CIRC[parsed.correctIndex]
+        );
+        if (explanationWasSplit) {
+          meta.push("// 해설: 줄 시작 ①②③④ 순서 블록으로 선지별로 나눔 · 저장 시 줄 앞 ①~④는 제거(앞 문단 공통)");
+        }
+        meta.push("// sort_order 는 API에서 비우면 단원 맨 뒤에 자동 연번");
+        if (!unit_id) meta.push("// 단원 미선택: unit_id 가 비어 있습니다. 위에서 단원을 고른 뒤 다시 가공하세요.");
+        pre.textContent = meta.join("\n") + "\n\n" + JSON.stringify(rows, null, 2);
+        pre.classList.remove("empty");
+      }
+
+      function clearDbPreview() {
+        const pre = document.getElementById("dbPreview");
+        pre.textContent = "문제 가공을 누르면 여기에 JSON으로 표시됩니다.";
+        pre.classList.add("empty");
+      }
+
+      async function loadEnv() {
+        const r = await fetch("/api/env?format=json", { cache: "no-store" });
+        if (!r.ok) throw new Error("/api/env " + r.status);
+        return r.json();
+      }
+
+      function supabaseFromEnv(env) {
+        const url = (env.SUPABASE_URL || "").trim() || (env.SUPABASE_PROJECT_ID ? "https://" + env.SUPABASE_PROJECT_ID + ".supabase.co" : "");
+        const key = (env.SUPABASE_ANON_KEY || "").trim();
+        if (!url || !key || !window.supabase) throw new Error("Supabase URL/anon 키 없음");
+        return window.supabase.createClient(url, key, {
+          global: { headers: { apikey: key, Authorization: "Bearer " + key } },
+        });
+      }
+
+      async function apiAdmin(body) {
+        const secret = getSecret();
+        if (!secret) throw new Error("관리 비밀번호를 입력하세요.");
+        const r = await fetch("/api/admin/questions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-ox-admin-secret": secret },
+          body: JSON.stringify(body),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || r.statusText || String(r.status));
+        return j;
+      }
+
+      async function fillUnits(client) {
+        const [{ data: subs, error: e1 }, { data: units, error: e2 }] = await Promise.all([
+          client.from("quiz_subjects").select("id,name,sort_order").order("sort_order"),
+          client.from("quiz_units").select("id,subject_id,parent_unit_id,name,sort_order").order("sort_order"),
+        ]);
+        if (e1) throw e1;
+        if (e2) throw e2;
+        const subMap = Object.fromEntries((subs || []).map((s) => [s.id, s.name]));
+        const byId = Object.fromEntries((units || []).map((u) => [u.id, u]));
+        unitSelect.innerHTML = "";
+        for (const u of units || []) {
+          const sn = subMap[u.subject_id] || "?";
+          const parent = u.parent_unit_id ? byId[u.parent_unit_id] : null;
+          const label = parent ? sn + " › " + parent.name + " › " + u.name : sn + " › " + u.name;
+          const opt = document.createElement("option");
+          opt.value = u.id;
+          opt.textContent = label;
+          unitSelect.appendChild(opt);
+        }
+        if (!unitSelect.options.length) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "(단원 없음 — Supabase에 단원을 먼저 넣으세요)";
+          unitSelect.appendChild(opt);
+        }
+      }
+
+      document.getElementById("btnProcessRaw").onclick = () => {
+        setMsg("");
+        const raw = document.getElementById("rawBlock").value;
+        const unit_id = unitSelect.value || "";
+        const packRaw = document.getElementById("packNo").value.trim();
+        const packNum = packRaw === "" ? null : Number(packRaw);
+        const pack_no = Number.isFinite(packNum) ? packNum : null;
+        let parsed;
+        try {
+          parsed = parseRawFourChoiceBlock(raw);
+        } catch (e) {
+          clearDbPreview();
+          return setMsg(String(e.message || e), "err");
+        }
+        setDbPreviewFromParsed(parsed, unit_id, pack_no);
+        setMsg("DB 양식 미리보기를 갱신했습니다.", "ok");
+      };
+
+      document.getElementById("btnAddFromRaw").onclick = async () => {
+        setMsg("");
+        const unit_id = unitSelect.value;
+        if (!unit_id) return setMsg("단원을 선택하세요.", "err");
+        const raw = document.getElementById("rawBlock").value;
+        const packRaw = document.getElementById("packNo").value.trim();
+        let parsed;
+        try {
+          parsed = parseRawFourChoiceBlock(raw);
+        } catch (e) {
+          clearDbPreview();
+          return setMsg(String(e.message || e), "err");
+        }
+        const packNum = packRaw === "" ? null : Number(packRaw);
+        const pack_no = Number.isFinite(packNum) ? packNum : null;
+        setDbPreviewFromParsed(parsed, unit_id, pack_no);
+        const { rows } = buildFourQuestionRows(parsed, unit_id, pack_no);
+        const summaryLines = [];
+        try {
+          for (let i = 0; i < 4; i++) {
+            const row = rows[i];
+            const answer = row.answer;
+            summaryLines.push(CIRC[i] + " → " + (answer ? "O" : "X") + " · " + row.choice_text.slice(0, 44) + (row.choice_text.length > 44 ? "…" : ""));
+            await apiAdmin({
+              action: "insert",
+              unit_id,
+              question: row.question,
+              choice_text: row.choice_text,
+              answer: row.answer,
+              explanation: row.explanation,
+              pack_no: row.pack_no,
+            });
+          }
+          setMsg(
+            "4행 추가됨 (" +
+              (parsed.isNegative ? "「옳지 않은」형: 정답 번호는 X" : "「옳은」형: 정답 번호는 O") +
+              " · 해설 답 " +
+              CIRC[parsed.correctIndex] +
+              ")\n" +
+              summaryLines.join("\n"),
+            "ok"
+          );
+        } catch (e) {
+          setMsg(String(e.message || e), "err");
+        }
+      };
+
+      document.getElementById("btnAdd").onclick = async () => {
+        setMsg("");
+        const unit_id = unitSelect.value;
+        if (!unit_id) return setMsg("단원을 선택하세요.", "err");
+        const question = document.getElementById("question").value.trim();
+        const choice_text = document.getElementById("choice").value.trim();
+        const explanation = stripCircledFromExplanationLines(document.getElementById("explanation").value.trim());
+        const packRaw = document.getElementById("packNo").value.trim();
+        const sortRaw = document.getElementById("sortOrder").value.trim();
+        const answer = document.querySelector('input[name="ans"]:checked').value === "o";
+        try {
+          const body = {
+            action: "insert",
+            unit_id,
+            question,
+            choice_text,
+            answer,
+            explanation,
+            pack_no: packRaw === "" ? null : Number(packRaw),
+          };
+          if (sortRaw !== "") body.sort_order = Number(sortRaw);
+          const j = await apiAdmin(body);
+          setMsg("추가됨. id: " + (j.id || "") + "\n아래에서 목록을 새로고침할 수 있습니다.", "ok");
+        } catch (e) {
+          setMsg(String(e.message || e), "err");
+        }
+      };
+
+      document.getElementById("btnLoad").onclick = async () => {
+        setMsg("");
+        listWrap.innerHTML = "";
+        const unit_id = unitSelect.value;
+        if (!unit_id) return setMsg("단원을 선택하세요.", "err");
+        try {
+          const env = await loadEnv();
+          const client = supabaseFromEnv(env);
+          const { data, error } = await client
+            .from("quiz_questions")
+            .select("id,question,choice_text,sort_order,pack_no")
+            .eq("unit_id", unit_id)
+            .order("sort_order", { ascending: true })
+            .limit(500);
+          if (error) throw error;
+          if (!data || !data.length) {
+            listWrap.innerHTML = "<p class='muted'>문항이 없습니다.</p>";
+            return;
+          }
+          const t = document.createElement("table");
+          const thead = document.createElement("thead");
+          const hr = document.createElement("tr");
+          for (const h of ["sort", "pack", "지문 앞부분", "선지 앞부분", ""]) {
+            const th = document.createElement("th");
+            th.textContent = h;
+            hr.appendChild(th);
+          }
+          thead.appendChild(hr);
+          t.appendChild(thead);
+          const tb = document.createElement("tbody");
+          const short = (s, n) => {
+            const x = String(s || "").replace(/\s+/g, " ").trim();
+            return x.length <= n ? x : x.slice(0, n) + "…";
+          };
+          for (const row of data) {
+            const tr = document.createElement("tr");
+            const td1 = document.createElement("td");
+            td1.textContent = String(row.sort_order ?? "");
+            const td2 = document.createElement("td");
+            td2.textContent = row.pack_no != null ? String(row.pack_no) : "";
+            const td3 = document.createElement("td");
+            td3.textContent = short(row.question, 48);
+            const td4 = document.createElement("td");
+            td4.textContent = short(row.choice_text, 36);
+            const td5 = document.createElement("td");
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "danger";
+            btn.textContent = "삭제";
+            btn.style.marginTop = "0";
+            btn.onclick = async () => {
+              if (!confirm("이 문항을 삭제할까요? 되돌릴 수 없습니다.")) return;
+              try {
+                await apiAdmin({ action: "delete", id: row.id });
+                tr.remove();
+                setMsg("삭제됨.", "ok");
+              } catch (e) {
+                setMsg(String(e.message || e), "err");
+              }
+            };
+            td5.appendChild(btn);
+            tr.append(td1, td2, td3, td4, td5);
+            tb.appendChild(tr);
+          }
+          t.appendChild(tb);
+          listWrap.appendChild(t);
+        } catch (e) {
+          setMsg(String(e.message || e), "err");
+        }
+      };
+
+      (async () => {
+        try {
+          const env = await loadEnv();
+          const client = supabaseFromEnv(env);
+          await fillUnits(client);
+          setMsg("단원 목록을 불러왔습니다. 관리 비밀번호 입력 후 추가·삭제하세요.", "ok");
+        } catch (e) {
+          setMsg(String(e.message || e), "err");
+        }
+      })();
+    </script>
+  </body>
+</html>

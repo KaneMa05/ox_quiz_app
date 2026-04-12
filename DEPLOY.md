@@ -63,7 +63,10 @@ Cursor에 **Supabase MCP**가 연결되어 있으면, 채팅 중 에이전트가
    - `SUPABASE_PROJECT_ID` + `SUPABASE_ANON_KEY`  
    - 또는 `SUPABASE_URL` + `SUPABASE_ANON_KEY`  
    (`env.example.txt` 참고)
-4. Deploy.
+4. **문제 입력 페이지(`/admin`)**를 쓰려면 같은 프로젝트에 다음도 넣습니다. (`service_role`은 서버 함수에서만 쓰이며 브라우저에 내려가지 않습니다.)
+   - `SUPABASE_SERVICE_ROLE_KEY` — Supabase **Settings → API**의 service_role (절대 공개 저장소에 커밋하지 마세요.)
+   - `OX_ADMIN_SECRET` — 임의로 긴 문자열. 관리 페이지에서 입력한 값과 일치할 때만 `/api/admin/questions`가 삽입·삭제를 수행합니다.
+5. Deploy.
 
 ### 배포가 반영되지 않을 때 (체크리스트)
 

@@ -58,13 +58,11 @@ def main() -> None:
     )
     hs = hutf(stem)
     for i, (_c, st, a, ex) in enumerate(opts):
-        body = "문제: " + stem + "\n\n선지: " + st
         lines.append(
-            "insert into public.quiz_questions (id, unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no, is_active) values ("
+            "insert into public.quiz_questions (id, unit_id, question, choice_text, answer, explanation, sort_order, pack_no, is_active) values ("
             f"'{qids[i]}'::uuid, '{uid}'::uuid, "
             f"convert_from(decode('{hs}', 'hex'), 'UTF8'), "
             f"convert_from(decode('{hutf(st)}', 'hex'), 'UTF8'), "
-            f"convert_from(decode('{hutf(body)}', 'hex'), 'UTF8'), "
             f"{str(a).lower()}, "
             f"convert_from(decode('{hutf(ex)}', 'hex'), 'UTF8'), "
             f"{i}, 301, true);"

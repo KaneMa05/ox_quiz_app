@@ -12,13 +12,12 @@ if not m:
 STEM = m.group(1)
 
 rows = [
-    ["id", "unit_id", "question", "choice_text", "body", "answer", "explanation", "sort_order", "pack_no", "is_active"],
+    ["id", "unit_id", "question", "choice_text", "answer", "explanation", "sort_order", "pack_no", "is_active"],
     [
         "866aebf0-c7f0-5421-a82d-33f7d7a29068",
         "a3418c9f-0641-5cf6-b4fe-39ae5cfb50b0",
         STEM,
         "㉠ 1953, ㉡ 1996",
-        f"문제: {STEM}\n\n선지: ㉠ 1953, ㉡ 1996",
         "TRUE",
         "정답 ①. ㉠ 1953년, ㉡ 1996년(무부 치안국 소속 해양경찰대 발족일·해양수산부 발족과 함께 외청 독립일).",
         "0",
@@ -30,7 +29,6 @@ rows = [
         "a3418c9f-0641-5cf6-b4fe-39ae5cfb50b0",
         STEM,
         "㉠ 1950, ㉡ 1993",
-        f"문제: {STEM}\n\n선지: ㉠ 1950, ㉡ 1993",
         "FALSE",
         "연도 조합이 변천사와 맞지 않는다.",
         "1",
@@ -42,7 +40,6 @@ rows = [
         "a3418c9f-0641-5cf6-b4fe-39ae5cfb50b0",
         STEM,
         "㉠ 1951, ㉡ 1992",
-        f"문제: {STEM}\n\n선지: ㉠ 1951, ㉡ 1992",
         "FALSE",
         "연도 조합이 변천사와 맞지 않는다.",
         "2",
@@ -54,7 +51,6 @@ rows = [
         "a3418c9f-0641-5cf6-b4fe-39ae5cfb50b0",
         STEM,
         "㉠ 1952, ㉡ 1995",
-        f"문제: {STEM}\n\n선지: ㉠ 1952, ㉡ 1995",
         "FALSE",
         "연도 조합이 변천사와 맞지 않는다.",
         "3",

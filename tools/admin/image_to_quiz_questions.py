@@ -476,13 +476,12 @@ def _build_sql(unit_id: str, pack_no: int, questions: list[dict[str, Any]]) -> s
             st = (ch.get("text") or "").strip()
             ans = bool(ch.get("correct"))
             ex = _choice_explanation(q, i)
-            body = f"문제: {stem}\n\n선지: {st}"
             qid = str(uuid.uuid4())
             so = sort_base + i
             lines.append(
-                "insert into public.quiz_questions (id, unit_id, question, choice_text, body, answer, explanation, sort_order, pack_no, is_active) values ("
+                "insert into public.quiz_questions (id, unit_id, question, choice_text, answer, explanation, sort_order, pack_no, is_active) values ("
                 f"'{qid}'::uuid, '{unit_id}'::uuid, "
-                f"{_sql_dollar_quote(stem)}, {_sql_dollar_quote(st)}, {_sql_dollar_quote(body)}, "
+                f"{_sql_dollar_quote(stem)}, {_sql_dollar_quote(st)}, "
                 f"{str(ans).lower()}, {_sql_dollar_quote(ex)}, {so}, {pno}, true);"
             )
         sort_base += len(choices)

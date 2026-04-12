@@ -50,7 +50,7 @@ const USE_LOCAL_ONLY = false;
 let curriculumDataSource = "local_js";
 const MASTERED_KEY = "ox-mastered-v1";
 const WRONG_KEY = "ox-wrong-v1";
-/** 같은 문항(body)을 이 횟수만큼 맞추면 이후 출제에서 제외 */
+/** 같은 문항(진행 키 = 지문+선지 조합)을 이 횟수만큼 맞추면 이후 출제에서 제외 */
 const MASTER_EXCLUDE_AFTER_CORRECT = 2;
 
 function readMasteredMap() {
@@ -212,15 +212,28 @@ function uuidMapKey(v) {
   return String(v).toLowerCase();
 }
 
+function embeddedQuizItem(q) {
+  const raw = q.quiz_items;
+  if (raw == null) return null;
+  return Array.isArray(raw) ? raw[0] ?? null : raw;
+}
+
 function mapQuestionRowFromDb(q) {
+  const item = embeddedQuizItem(q);
+  const stemFromItem = item && item.stem != null ? String(item.stem).trim() : "";
+  const stem = stemFromItem || (q.question ?? "").toString();
+  const choiceText = (q.choice_text ?? "").toString();
+  const packFromRow = q.pack_no != null ? Number(q.pack_no) : null;
+  const packFromItem = item && item.pack_no != null ? Number(item.pack_no) : null;
+  const packNo = packFromRow != null ? packFromRow : packFromItem;
+
   return {
-    packNo: q.pack_no != null ? Number(q.pack_no) : null,
-    question: (q.question ?? "").toString(),
-    choice_text: (q.choice_text ?? "").toString(),
+    packNo: Number.isFinite(packNo) ? packNo : null,
+    question: stem,
+    choice_text: choiceText,
     body: (() => {
-      if (q.body != null && String(q.body).trim() !== "") return String(q.body).trim();
-      const qq = (q.question ?? "").toString().trim();
-      const ct = (q.choice_text ?? "").toString().trim();
+      const qq = stem.trim();
+      const ct = choiceText.trim();
       return qq && ct ? `문제: ${qq}\n\n선지: ${ct}` : "";
     })(),
     answer: q.answer,
@@ -314,7 +327,9 @@ async function loadCurriculumFromSupabase(env) {
     client.from("quiz_units").select("id,subject_id,parent_unit_id,name,sort_order").order("sort_order"),
     client
       .from("quiz_questions")
-      .select("id,unit_id,question,choice_text,body,answer,explanation,sort_order,pack_no")
+      .select(
+        "id,unit_id,item_id,question,choice_text,answer,explanation,sort_order,pack_no,quiz_items(stem,pack_no,item_type,sort_order)",
+      )
       .order("sort_order")
       // PostgREST 기본 max-rows(예: 1000) 넘으면 뒤쪽 문항이 잘려 단원에 문제가 없는 것처럼 보일 수 있음
       .limit(20000),
