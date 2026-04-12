@@ -606,18 +606,23 @@ function parseQuestionParts(q) {
 /** 4지선다형 기출 꼬리 문구 — OX 화면에서는 지문만 보이도록 제거(데이터·저장 키는 그대로) */
 function stripMcQuestionTail(stem) {
   if (!stem) return stem;
+  // PDF 등에서 '옳지'가 '옳'+줄바꿈+'지'로 끊기면 \s*로 잡음(지문 본문 줄바꿈은 유지)
+  let s = String(stem);
+  const O = "옳\\s*지";
+  const Oe = "옳\\s*은";
+  const An = "않\\s*은";
+  const Ge = "것\\s*은";
   const patterns = [
-    /\s*에\s*대한\s*설명으로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
-    /\s*중\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
-    /\s*으로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
-    /(?<!으)\s*로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
-    /\s*으로\s*가장\s*옳은\s*것은\??\s*$/u,
-    /\s*경우로\s*가장\s*옳은\s*것은\??\s*$/u,
-    /(?<!으)\s*로\s*가장\s*옳은\s*것은\??\s*$/u,
-    /\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
-    /\s*가장\s*옳은\s*것은\??\s*$/u,
+    new RegExp(`\\s*에\\s*대한\\s*설명으로\\s*가장\\s*${O}\\s*${An}\\s*${Ge}\\??\\s*$`, "u"),
+    new RegExp(`\\s*중\\s*가장\\s*${O}\\s*${An}\\s*${Ge}\\??\\s*$`, "u"),
+    new RegExp(`\\s*으로\\s*가장\\s*${O}\\s*${An}\\s*${Ge}\\??\\s*$`, "u"),
+    new RegExp(`(?<!으)\\s*로\\s*가장\\s*${O}\\s*${An}\\s*${Ge}\\??\\s*$`, "u"),
+    new RegExp(`\\s*으로\\s*가장\\s*${Oe}\\s*${Ge}\\??\\s*$`, "u"),
+    new RegExp(`\\s*경우로\\s*가장\\s*${Oe}\\s*${Ge}\\??\\s*$`, "u"),
+    new RegExp(`(?<!으)\\s*로\\s*가장\\s*${Oe}\\s*${Ge}\\??\\s*$`, "u"),
+    new RegExp(`\\s*가장\\s*${O}\\s*${An}\\s*${Ge}\\??\\s*$`, "u"),
+    new RegExp(`\\s*가장\\s*${Oe}\\s*${Ge}\\??\\s*$`, "u"),
   ];
-  let s = stem;
   for (const re of patterns) {
     s = s.replace(re, "");
   }

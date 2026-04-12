@@ -441,18 +441,22 @@
       /** 4지선다형 기출 꼬리 — OX·DB에는 지문 본문만 남김 */
       function stripMcQuestionTail(stem) {
         if (!stem) return stem;
+        let s = String(stem);
+        const O = "옳\\s*지";
+        const Oe = "옳\\s*은";
+        const An = "않\\s*은";
+        const Ge = "것\\s*은";
         const patterns = [
-          /\s*에\s*대한\s*설명으로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
-          /\s*중\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
-          /\s*으로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
-          /(?<!으)\s*로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
-          /\s*으로\s*가장\s*옳은\s*것은\??\s*$/u,
-          /\s*경우로\s*가장\s*옳은\s*것은\??\s*$/u,
-          /(?<!으)\s*로\s*가장\s*옳은\s*것은\??\s*$/u,
-          /\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
-          /\s*가장\s*옳은\s*것은\??\s*$/u,
+          new RegExp(`\\s*에\\s*대한\\s*설명으로\\s*가장\\s*${O}\\s*${An}\\s*${Ge}\\??\\s*$`, "u"),
+          new RegExp(`\\s*중\\s*가장\\s*${O}\\s*${An}\\s*${Ge}\\??\\s*$`, "u"),
+          new RegExp(`\\s*으로\\s*가장\\s*${O}\\s*${An}\\s*${Ge}\\??\\s*$`, "u"),
+          new RegExp(`(?<!으)\\s*로\\s*가장\\s*${O}\\s*${An}\\s*${Ge}\\??\\s*$`, "u"),
+          new RegExp(`\\s*으로\\s*가장\\s*${Oe}\\s*${Ge}\\??\\s*$`, "u"),
+          new RegExp(`\\s*경우로\\s*가장\\s*${Oe}\\s*${Ge}\\??\\s*$`, "u"),
+          new RegExp(`(?<!으)\\s*로\\s*가장\\s*${Oe}\\s*${Ge}\\??\\s*$`, "u"),
+          new RegExp(`\\s*가장\\s*${O}\\s*${An}\\s*${Ge}\\??\\s*$`, "u"),
+          new RegExp(`\\s*가장\\s*${Oe}\\s*${Ge}\\??\\s*$`, "u"),
         ];
-        let s = stem;
         for (const re of patterns) {
           s = s.replace(re, "");
         }
@@ -475,7 +479,9 @@
       /** 지문에 「옳지 않은 / 틀린 …」이 있으면 정답 번호는 거짓 진술(=X) 한 개다. */
       function stemImpliesNegativeMc(stem) {
         const t = String(stem || "");
-        return /가장\s*옳지\s*않은|옳지\s*않은\s*것|틀린\s*것|잘못된\s*것|맞지\s*않은|그릇된\s*것|부적절한\s*것|옳지\s*않은\s*내용|틀린\s*내용/u.test(t);
+        return /가장\s*옳\s*지\s*않\s*은|옳\s*지\s*않\s*은\s*것|틀린\s*것|잘못된\s*것|맞지\s*않은|그릇된\s*것|부적절한\s*것|옳\s*지\s*않\s*은\s*내용|틀린\s*내용/u.test(
+          t,
+        );
       }
 
       function answerTokenToIndex(tok) {
