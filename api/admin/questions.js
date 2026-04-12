@@ -45,6 +45,26 @@ function json(res, code, obj) {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+function stripMcQuestionTail(stem) {
+  if (!stem) return stem;
+  const patterns = [
+    /\s*에\s*대한\s*설명으로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+    /\s*중\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+    /\s*으로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+    /(?<!으)\s*로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+    /\s*으로\s*가장\s*옳은\s*것은\??\s*$/u,
+    /\s*경우로\s*가장\s*옳은\s*것은\??\s*$/u,
+    /(?<!으)\s*로\s*가장\s*옳은\s*것은\??\s*$/u,
+    /\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+    /\s*가장\s*옳은\s*것은\??\s*$/u,
+  ];
+  let s = stem;
+  for (const re of patterns) {
+    s = s.replace(re, "");
+  }
+  return s.trim();
+}
+
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -137,7 +157,7 @@ export default async function handler(req, res) {
       json(res, 400, { ok: false, error: "unit_id must be a UUID" });
       return;
     }
-    const question = String(body.question || "").trim();
+    const question = stripMcQuestionTail(String(body.question || "").trim());
     const choice_text = String(body.choice_text || "").trim();
     if (!question || !choice_text) {
       json(res, 400, { ok: false, error: "question and choice_text are required" });

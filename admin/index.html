@@ -438,6 +438,27 @@
           .trim();
       }
 
+      /** 4지선다형 기출 꼬리 — OX·DB에는 지문 본문만 남김 */
+      function stripMcQuestionTail(stem) {
+        if (!stem) return stem;
+        const patterns = [
+          /\s*에\s*대한\s*설명으로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+          /\s*중\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+          /\s*으로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+          /(?<!으)\s*로\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+          /\s*으로\s*가장\s*옳은\s*것은\??\s*$/u,
+          /\s*경우로\s*가장\s*옳은\s*것은\??\s*$/u,
+          /(?<!으)\s*로\s*가장\s*옳은\s*것은\??\s*$/u,
+          /\s*가장\s*옳지\s*않은\s*것은\??\s*$/u,
+          /\s*가장\s*옳은\s*것은\??\s*$/u,
+        ];
+        let s = stem;
+        for (const re of patterns) {
+          s = s.replace(re, "");
+        }
+        return s.trim();
+      }
+
       /** 해설 문자열에서 각 줄 앞의 ①~④와 뒤따르는 공백 제거(DB 저장용). */
       function stripCircledFromExplanationLines(s) {
         if (s == null) return null;
@@ -486,11 +507,12 @@
         const cm = head.match(choiceRe);
         if (!cm) throw new Error("①②③④가 순서대로 있는지 확인하세요. (첫 선지는 ①부터)");
 
-        const stem = collapseWs(cm[1]);
+        const stemRaw = collapseWs(cm[1]);
         const choices = [collapseWs(cm[2]), collapseWs(cm[3]), collapseWs(cm[4]), collapseWs(cm[5])];
         if (choices.some((c) => !c)) throw new Error("①~④ 선지 본문이 비어 있는 항목이 있습니다.");
 
-        const isNegative = stemImpliesNegativeMc(stem);
+        const isNegative = stemImpliesNegativeMc(stemRaw);
+        const stem = stripMcQuestionTail(stemRaw);
         return { stem, choices, correctIndex, explanation, isNegative };
       }
 
@@ -828,7 +850,7 @@
           showAdminAlert("알림", "단원을 선택하세요.");
           return;
         }
-        const question = document.getElementById("question").value.trim();
+        const question = stripMcQuestionTail(document.getElementById("question").value.trim());
         const choice_text = document.getElementById("choice").value.trim();
         const explanation = stripCircledFromExplanationLines(document.getElementById("explanation").value.trim());
         const packRaw = document.getElementById("packNo").value.trim();
