@@ -498,56 +498,51 @@
         return isNegative ? rowIndex !== correctIndex : rowIndex === correctIndex;
       }
 
-      function findExplanationCircledHits(full) {
-        const re = /(?:^|\n)\s*([①②③④])\s*/g;
-        const hits = [];
-        let m;
-        while ((m = re.exec(full))) {
-          const idx = CIRC.indexOf(m[1]);
-          if (idx < 0) continue;
-          hits.push({ idx, blockStart: m.index, afterMarker: m.index + m[0].length });
-        }
-        return hits;
-      }
-
-      /** 문서 순서로 ①→②→③→④ 마커를 찾음(중간에 잘못 잡힌 ① 등이 끼어도 동작). */
-      function findOrderedFourExplanationMarkers(hits) {
-        const ordered = hits.slice().sort((a, b) => a.blockStart - b.blockStart);
-        for (let s = 0; s < ordered.length; s++) {
-          if (ordered[s].idx !== 0) continue;
-          const picked = [ordered[s]];
-          let need = 1;
-          for (let j = s + 1; j < ordered.length && need < 4; j++) {
-            if (ordered[j].idx === need) {
-              picked.push(ordered[j]);
-              need++;
-            }
-          }
-          if (picked.length === 4) return picked;
-        }
-        return null;
+      /**
+       * 줄 맨 앞(선행 공백만 허용)의 ①~④. (전체 문자열 정규식 + \\s* 는 개행을 잡아먹어 블록 경계가 깨질 수 있음)
+       */
+      function circledLineHeader(ln) {
+        const s = String(ln);
+        const m = s.match(/^\s*([①②③④])(?=\s|$|[.．、，,]|[(（])/u);
+        if (!m) return { idx: -1, rest: "" };
+        const idx = CIRC.indexOf(m[1]);
+        if (idx < 0) return { idx: -1, rest: "" };
+        return { idx, rest: s.slice(m[0].length).trim() };
       }
 
       /**
-       * 해설 본문: ①②③④ 네 줄 연속이면 선지별 분리, 줄 시작 번호가 한 번뿐이면 해당 선지만, 아니면 전체를 네 행에 동일.
+       * 해설 본문: 줄 시작 ①~④ 기준으로 선지별 블록 분리(연속 줄은 현재 번호 블록에 합침).
        * @returns {{ mode: string, perRow: (string|null)[]|null, preamble: string, explanationWasSplit: boolean }}
        */
       function resolveExplanationPerRows(fullExplanation) {
         const full = String(fullExplanation || "").replace(/\r\n/g, "\n").trim();
         if (!full) return { mode: "none", perRow: null, preamble: "", explanationWasSplit: false };
 
-        const hits = findExplanationCircledHits(full);
-        const h = findOrderedFourExplanationMarkers(hits);
+        const lines = full.split("\n");
+        const buffers = [[], [], [], []];
+        const preambleLines = [];
+        let activeIdx = null;
+        const seenIdx = new Set();
 
-        if (h) {
-          const preamble = full.slice(0, h[0].blockStart).trim();
-          const rawBodies = [];
-          for (let i = 0; i < 4; i++) {
-            const from = h[i].afterMarker;
-            const to = i < 3 ? h[i + 1].blockStart : full.length;
-            rawBodies.push(full.slice(from, to).trim());
+        for (const rawLine of lines) {
+          const { idx, rest } = circledLineHeader(rawLine);
+          if (idx >= 0) {
+            seenIdx.add(idx);
+            activeIdx = idx;
+            if (rest) buffers[idx].push(rest);
+          } else if (activeIdx === null) {
+            preambleLines.push(rawLine);
+          } else {
+            buffers[activeIdx].push(rawLine);
           }
-          const perRow = rawBodies.map((body, i) => {
+        }
+
+        const preamble = preambleLines.join("\n").trim();
+        const bodyFor = (i) => buffers[i].join("\n").trim();
+
+        if (seenIdx.size >= 2) {
+          const perRow = [0, 1, 2, 3].map((i) => {
+            const body = bodyFor(i);
             const parts = [];
             if (preamble) parts.push(preamble);
             if (body) parts.push(body);
@@ -557,16 +552,15 @@
           return { mode: "multi", perRow, preamble, explanationWasSplit: true };
         }
 
-        if (hits.length === 1) {
-          const h0 = hits[0];
-          const preamble = full.slice(0, h0.blockStart).trim();
-          const after = full.slice(h0.afterMarker).trim();
+        if (seenIdx.size === 1) {
+          const only = [...seenIdx][0];
+          const body = bodyFor(only);
           const parts = [];
           if (preamble) parts.push(preamble);
-          if (after) parts.push(after);
+          if (body) parts.push(body);
           const combined = parts.join("\n\n").trim();
           const perRow = [null, null, null, null];
-          perRow[h0.idx] = combined || null;
+          perRow[only] = combined || null;
           return { mode: "single", perRow, preamble: preamble || "", explanationWasSplit: true };
         }
 
@@ -618,7 +612,7 @@
             CIRC[parsed.correctIndex]
         );
         if (explanationWasSplit && explanationMode === "multi") {
-          meta.push("// 해설: 줄 시작 ①②③④ 네 줄 연속 → 선지별 분리 · 줄 앞 번호 제거(앞 문단 공통)");
+          meta.push("// 해설: 줄 시작 ①~④ 로 블록 분리 · 줄 앞 번호 제거(앞 문단 공통)");
         }
         if (explanationWasSplit && explanationMode === "single") {
           meta.push("// 해설: 줄 시작 번호 한 번만 → 해당 선지 행만 explanation, 나머지 null");
