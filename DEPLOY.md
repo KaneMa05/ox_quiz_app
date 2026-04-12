@@ -89,6 +89,12 @@ Cursor에 **Supabase MCP**가 연결되어 있으면, 채팅 중 에이전트가
 6. **올바른 GitHub 저장소**  
    OX 전용 저장소는 **[KaneMa05/ox_quiz_app](https://github.com/KaneMa05/ox_quiz_app)** 입니다. 상위 monorepo(다른 `origin`)의 `ox-quiz-app` 폴더만 작업했다면, 여기로 반영되지 않을 수 있습니다. monorepo에서 동기화하려면 `git remote add ox https://github.com/KaneMa05/ox_quiz_app.git` 후 `git subtree push --prefix=ox-quiz-app ox main` 등을 사용합니다(히스토리가 다르면 `--force`가 필요할 수 있음).
 
+7. **`POST /api/admin/questions` 가 503일 때**  
+   서버는 다음이 없으면 503과 JSON `error` 메시지를 돌려줍니다.
+   - `OX_ADMIN_SECRET` 미설정 → `"OX_ADMIN_SECRET is not set on the server"`
+   - `SUPABASE_SERVICE_ROLE_KEY` 또는 URL(`SUPABASE_URL` / `SUPABASE_PROJECT_ID`) 미설정 → `"SUPABASE_URL (or PROJECT_ID) and SUPABASE_SERVICE_ROLE_KEY must be set"`  
+   Vercel **Production** 환경변수에 위 값을 넣은 뒤 **재배포**해야 합니다(저장만 하면 서버리스에 안 들어갈 수 있음).
+
 ## 3. 동작 방식
 
 - 브라우저가 `/api/env?format=json`으로 키를 읽고, Supabase에서 `quiz_subjects`, `quiz_units`, `quiz_questions`, `quiz_settings`(출제 제외 번호)를 조회합니다.
