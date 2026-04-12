@@ -87,6 +87,9 @@
       #msg.err {
         color: #f87171;
       }
+      #msg.pending {
+        color: #fbbf24;
+      }
       #msgActions {
         margin-top: 0.5rem;
       }
@@ -191,6 +194,9 @@
       파란 버튼만 서버로 전송되어 DB에 반영됩니다. 회색 버튼은 JSON 미리보기용입니다.
     </p>
 
+    <div id="msg" role="status" aria-live="polite"></div>
+    <div id="msgActions" class="hidden" aria-live="polite"></div>
+
     <label>DB 양식 미리보기 (<code>quiz_questions</code>에 넣을 값 4행)</label>
     <pre id="dbPreview" class="dbPreview empty" role="region" aria-label="DB 양식 미리보기">가공 또는 DB 추가 직전에 여기에 JSON으로 표시됩니다.</pre>
 
@@ -229,9 +235,6 @@
       <code>SUPABASE_SERVICE_ROLE_KEY</code> · <code>SUPABASE_URL</code>(또는 PROJECT_ID)를 설정하세요.
     </p>
 
-    <div id="msg"></div>
-    <div id="msgActions" class="hidden" aria-live="polite"></div>
-
     <script>
       const msg = document.getElementById("msg");
       const msgActions = document.getElementById("msgActions");
@@ -266,19 +269,65 @@
         msg.className = cls || "";
       }
 
-      /** DB 반영 완료 후: 확인 클릭 시 새로고침(단원은 sessionStorage 로 유지). */
-      function setMsgDoneWithRefresh(detailText, cls) {
+      function focusMsg() {
+        try {
+          msg.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } catch (_) {}
+      }
+
+      /**
+       * DB 추가 완료 후: 다음 문제 입력을 위해 입력란 비우기 또는 전체 새로고침(단원은 sessionStorage 유지).
+       * @param {"rawFour"|"manual"} kind
+       */
+      function showPostInsertDone(detailText, kind) {
         clearMsgActions();
+        const hint =
+          kind === "rawFour"
+            ? "다음 문제를 넣으려면「입력란 비우기」로 원본·미리보기를 지우거나,「페이지 새로고침」으로 화면을 다시 불러오세요."
+            : "다음 문제를 넣으려면「입력란 비우기」로 지문·선지란을 비우거나,「페이지 새로고침」을 누르세요.";
         msg.textContent =
-          "완료되었습니다.\n아래 확인을 누르면 페이지가 새로고침됩니다.\n(단원 선택은 그대로 유지됩니다.)" +
-          (detailText ? "\n\n" + detailText : "");
-        msg.className = cls || "ok";
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.textContent = "확인";
-        btn.addEventListener("click", () => location.reload());
-        msgActions.appendChild(btn);
+          "완료되었습니다.\n" + hint + "\n(단원 선택은 그대로 유지됩니다.)" + (detailText ? "\n\n" + detailText : "");
+        msg.className = "ok";
+
+        const row = document.createElement("div");
+        row.className = "btnRow";
+
+        const btnClear = document.createElement("button");
+        btnClear.type = "button";
+        btnClear.className = "secondary";
+        btnClear.textContent = "입력란 비우기";
+        if (kind === "rawFour") {
+          btnClear.onclick = () => {
+            document.getElementById("rawBlock").value = "";
+            clearDbPreview();
+            clearMsgActions();
+            setMsg("입력란을 비웠습니다. 다음 문제 원본을 붙여넣을 수 있습니다.", "ok");
+            focusMsg();
+            document.getElementById("rawBlock").focus();
+          };
+        } else {
+          btnClear.onclick = () => {
+            document.getElementById("question").value = "";
+            document.getElementById("choice").value = "";
+            document.getElementById("explanation").value = "";
+            document.getElementById("sortOrder").value = "";
+            clearMsgActions();
+            setMsg("입력란을 비웠습니다. 다음 문제를 입력할 수 있습니다.", "ok");
+            focusMsg();
+            document.getElementById("question").focus();
+          };
+        }
+        row.appendChild(btnClear);
+
+        const btnReload = document.createElement("button");
+        btnReload.type = "button";
+        btnReload.textContent = "페이지 새로고침";
+        btnReload.addEventListener("click", () => location.reload());
+        row.appendChild(btnReload);
+
+        msgActions.appendChild(row);
         msgActions.classList.remove("hidden");
+        focusMsg();
       }
 
       function getSecret() {
@@ -598,9 +647,14 @@
       };
 
       document.getElementById("btnAddFromRaw").onclick = async () => {
+        const btnAddFromRaw = document.getElementById("btnAddFromRaw");
         setMsg("");
         const unit_id = unitSelect.value;
-        if (!unit_id) return setMsg("단원을 선택하세요.", "err");
+        if (!unit_id) {
+          setMsg("단원을 선택하세요.", "err");
+          focusMsg();
+          return;
+        }
         const raw = document.getElementById("rawBlock").value;
         const packRaw = document.getElementById("packNo").value.trim();
         let parsed;
@@ -608,15 +662,31 @@
           parsed = parseRawFourChoiceBlock(raw);
         } catch (e) {
           clearDbPreview();
-          return setMsg(String(e.message || e), "err");
+          setMsg(String(e.message || e), "err");
+          focusMsg();
+          return;
         }
         const packNum = packRaw === "" ? null : Number(packRaw);
         const pack_no = Number.isFinite(packNum) ? packNum : null;
         setDbPreviewFromParsed(parsed, unit_id, pack_no);
         const { rows } = buildFourQuestionRows(parsed, unit_id, pack_no);
         const summaryLines = [];
+        btnAddFromRaw.disabled = true;
         try {
+          setMsg(
+            "Supabase에 4개의 선지 행을 저장합니다.\n서버로 전송 중입니다. 잠시만 기다려 주세요…",
+            "pending"
+          );
+          focusMsg();
           for (let i = 0; i < 4; i++) {
+            setMsg(
+              "저장 중… (" +
+                (i + 1) +
+                "/4)\n선지 " +
+                CIRC[i] +
+                " 행을 서버로 보내는 중입니다.",
+              "pending"
+            );
             const row = rows[i];
             const answer = row.answer;
             summaryLines.push(CIRC[i] + " → " + (answer ? "O" : "X") + " · " + row.choice_text.slice(0, 44) + (row.choice_text.length > 44 ? "…" : ""));
@@ -631,17 +701,20 @@
             });
           }
           rememberUnitSelection();
-          setMsgDoneWithRefresh(
+          showPostInsertDone(
             "Supabase에 4행 추가됨 (" +
               (parsed.isNegative ? "「옳지 않은」형: 정답 번호는 X" : "「옳은」형: 정답 번호는 O") +
               " · 해설 답 " +
               CIRC[parsed.correctIndex] +
               ")\n" +
               summaryLines.join("\n"),
-            "ok"
+            "rawFour"
           );
         } catch (e) {
-          setMsg(String(e.message || e), "err");
+          setMsg("저장에 실패했습니다.\n\n" + String(e.message || e), "err");
+          focusMsg();
+        } finally {
+          btnAddFromRaw.disabled = false;
         }
       };
 
@@ -668,7 +741,7 @@
           if (sortRaw !== "") body.sort_order = Number(sortRaw);
           const j = await apiAdmin(body);
           rememberUnitSelection();
-          setMsgDoneWithRefresh("추가된 id: " + (j.id || ""), "ok");
+          showPostInsertDone("추가된 id: " + (j.id || ""), "manual");
         } catch (e) {
           setMsg(String(e.message || e), "err");
         }
