@@ -87,6 +87,15 @@
       #msg.err {
         color: #f87171;
       }
+      #msgActions {
+        margin-top: 0.5rem;
+      }
+      #msgActions.hidden {
+        display: none;
+      }
+      #msgActions button {
+        margin-top: 0;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
@@ -221,15 +230,55 @@
     </p>
 
     <div id="msg"></div>
+    <div id="msgActions" class="hidden" aria-live="polite"></div>
 
     <script>
       const msg = document.getElementById("msg");
+      const msgActions = document.getElementById("msgActions");
       const unitSelect = document.getElementById("unitSelect");
       const listWrap = document.getElementById("listWrap");
+      const UNIT_STORE_KEY = "ox_admin_unit_id_v1";
+
+      function rememberUnitSelection() {
+        const v = unitSelect.value;
+        if (v) sessionStorage.setItem(UNIT_STORE_KEY, v);
+        else sessionStorage.removeItem(UNIT_STORE_KEY);
+      }
+
+      function restoreUnitSelection() {
+        const saved = sessionStorage.getItem(UNIT_STORE_KEY);
+        if (!saved) return;
+        const has = Array.from(unitSelect.options).some((o) => o.value === saved);
+        if (has) unitSelect.value = saved;
+      }
+
+      unitSelect.addEventListener("change", rememberUnitSelection);
+
+      function clearMsgActions() {
+        if (!msgActions) return;
+        msgActions.innerHTML = "";
+        msgActions.classList.add("hidden");
+      }
 
       function setMsg(text, cls) {
+        clearMsgActions();
         msg.textContent = text || "";
         msg.className = cls || "";
+      }
+
+      /** DB 반영 완료 후: 확인 클릭 시 새로고침(단원은 sessionStorage 로 유지). */
+      function setMsgDoneWithRefresh(detailText, cls) {
+        clearMsgActions();
+        msg.textContent =
+          "완료되었습니다.\n아래 확인을 누르면 페이지가 새로고침됩니다.\n(단원 선택은 그대로 유지됩니다.)" +
+          (detailText ? "\n\n" + detailText : "");
+        msg.className = cls || "ok";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "확인";
+        btn.addEventListener("click", () => location.reload());
+        msgActions.appendChild(btn);
+        msgActions.classList.remove("hidden");
       }
 
       function getSecret() {
@@ -526,6 +575,8 @@
           opt.textContent = "(단원 없음 — Supabase에 단원을 먼저 넣으세요)";
           unitSelect.appendChild(opt);
         }
+        restoreUnitSelection();
+        rememberUnitSelection();
       }
 
       document.getElementById("btnProcessRaw").onclick = () => {
@@ -579,7 +630,8 @@
               pack_no: row.pack_no,
             });
           }
-          setMsg(
+          rememberUnitSelection();
+          setMsgDoneWithRefresh(
             "Supabase에 4행 추가됨 (" +
               (parsed.isNegative ? "「옳지 않은」형: 정답 번호는 X" : "「옳은」형: 정답 번호는 O") +
               " · 해설 답 " +
@@ -615,7 +667,8 @@
           };
           if (sortRaw !== "") body.sort_order = Number(sortRaw);
           const j = await apiAdmin(body);
-          setMsg("추가됨. id: " + (j.id || "") + "\n아래에서 목록을 새로고침할 수 있습니다.", "ok");
+          rememberUnitSelection();
+          setMsgDoneWithRefresh("추가된 id: " + (j.id || ""), "ok");
         } catch (e) {
           setMsg(String(e.message || e), "err");
         }

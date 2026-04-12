@@ -322,18 +322,36 @@ async function loadCurriculumFromSupabase(env) {
     global: { headers: { apikey: key, Authorization: `Bearer ${key}` } },
   });
 
-  const [subRes, unitRes, qRes] = await Promise.all([
+  const qSelectWithItems =
+    "id,unit_id,item_id,question,choice_text,answer,explanation,sort_order,pack_no,quiz_items(stem,pack_no,item_type,sort_order)";
+  const qSelectFlat =
+    "id,unit_id,item_id,question,choice_text,answer,explanation,sort_order,pack_no";
+
+  const [subRes, unitRes, qResFirst] = await Promise.all([
     client.from("quiz_subjects").select("id,name,sort_order").order("sort_order"),
     client.from("quiz_units").select("id,subject_id,parent_unit_id,name,sort_order").order("sort_order"),
     client
       .from("quiz_questions")
-      .select(
-        "id,unit_id,item_id,question,choice_text,answer,explanation,sort_order,pack_no,quiz_items(stem,pack_no,item_type,sort_order)",
-      )
+      .select(qSelectWithItems)
       .order("sort_order")
       // PostgREST 기본 max-rows(예: 1000) 넘으면 뒤쪽 문항이 잘려 단원에 문제가 없는 것처럼 보일 수 있음
       .limit(20000),
   ]);
+
+  let qRes = qResFirst;
+  const noQuizItemsEmbed =
+    qRes.error &&
+    (qRes.error.code === "PGRST200" ||
+      /quiz_items/i.test(String(qRes.error.message || "")) ||
+      /quiz_items/i.test(String(qRes.error.details || "")));
+
+  if (noQuizItemsEmbed) {
+    console.warn(
+      "OX: quiz_questions↔quiz_items 관계가 스키마에 없어 임베드 없이 다시 불러옵니다. 지문 공유(stem)는 quiz_items·FK 적용 후 사용하세요.",
+      qRes.error,
+    );
+    qRes = await client.from("quiz_questions").select(qSelectFlat).order("sort_order").limit(20000);
+  }
 
   if (subRes.error) throw subRes.error;
   if (unitRes.error) throw unitRes.error;

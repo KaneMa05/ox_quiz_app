@@ -3,7 +3,7 @@
 ## 1. Supabase (DB)
 
 1. [Supabase](https://supabase.com)에서 프로젝트를 만듭니다.
-2. **SQL Editor**에서 이 저장소의 `supabase/schema.sql` 전체를 한 번 실행합니다(테이블·RLS 생성).
+2. **SQL Editor**에서 이 저장소의 `supabase/schema.sql` 전체를 한 번 실행합니다(테이블·RLS·`quiz_questions`↔`quiz_items` FK). 이미 예전 스키마가 있으면 **같은 파일을 다시 실행**해 컬럼·FK를 맞추면 됩니다.
 3. 과목·단원·문항 데이터는 **Table Editor**에서 직접 넣거나, SQL Editor에서 직접 `INSERT`를 작성해 실행합니다.  
    앱은 키가 없을 때 `data.js` 로컬 데이터를 쓰므로, DB는 비워 둔 채로도 동작 확인은 가능합니다.
 4. **Settings → API**에서 `Project URL`, `anon public` 키를 복사해 둡니다.
