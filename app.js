@@ -48,6 +48,13 @@ const USE_LOCAL_ONLY = false;
 
 /** "supabase" | "local_js" — 해양경찰학개론 예시는 data.js에 4문항만 있어, 로컬이면 DB 미연결과 동일한 증상이 납니다. */
 let curriculumDataSource = "local_js";
+
+/** Supabase 과목·단원만 선로드하고 문항은 단원별 지연 로드할 때 사용 */
+/** @type {{ client: any } | null} */
+let oxSupabaseLazy = null;
+
+/** @type {Map<string, Promise<boolean>>} */
+const oxUnitQuestionsInflight = new Map();
 const MASTERED_KEY = "ox-mastered-v1";
 const WRONG_KEY = "ox-wrong-v1";
 /** 같은 문항(진행 키 = 지문+선지 조합)을 이 횟수만큼 맞추면 이후 출제에서 제외 */
@@ -241,10 +248,18 @@ function mapQuestionRowFromDb(q) {
   };
 }
 
+/**
+ * @param {any[]} subjects
+ * @param {any[]} units
+ * @param {any[] | null} questions null이면 리프 단원의 questions는 null(아직 미로드)
+ */
 function buildCurriculumFromRows(subjects, units, questions) {
   const subs = (subjects || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   const uns = (units || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-  const qs = (questions || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const qs =
+    questions == null
+      ? null
+      : (questions || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   return subs.map((s) => {
     const sunits = uns.filter((u) => eqUuid(u.subject_id, s.id));
@@ -259,7 +274,10 @@ function buildCurriculumFromRows(subjects, units, questions) {
           .map((u) => ({
             id: u.id,
             name: u.name,
-            questions: qs.filter((qq) => eqUuid(qq.unit_id, u.id)).map(mapQuestionRowFromDb),
+            questions:
+              qs == null
+                ? null
+                : qs.filter((qq) => eqUuid(qq.unit_id, u.id)).map(mapQuestionRowFromDb),
           })),
       };
     }
@@ -287,9 +305,12 @@ function buildCurriculumFromRows(subjects, units, questions) {
             id: mi.id,
             name: mi.name,
             // 소단원 id + 그 부모 대단원 id(실수로 대단원에만 넣은 문항도 소단원에서 출제되게)
-            questions: qs
-              .filter((qq) => eqUuid(qq.unit_id, mi.id) || eqUuid(qq.unit_id, ma.id))
-              .map(mapQuestionRowFromDb),
+            questions:
+              qs == null
+                ? null
+                : qs
+                    .filter((qq) => eqUuid(qq.unit_id, mi.id) || eqUuid(qq.unit_id, ma.id))
+                    .map(mapQuestionRowFromDb),
           })),
       })),
     };
@@ -313,6 +334,104 @@ function findLeafUnit(sub, leafId) {
   return sub.units.find((u) => eqUuid(u.id, leafId)) || null;
 }
 
+/** 계층 과목에서 소단원(leaf)이 속한 대단원 */
+function majorUnitForLeaf(sub, leafId) {
+  if (!sub?.units || !leafId || !subjectHasTieredUnits(sub)) return null;
+  for (const m of sub.units) {
+    if (m.children?.some((c) => eqUuid(c.id, leafId))) return m;
+  }
+  return null;
+}
+
+const Q_SELECT_WITH_ITEMS =
+  "id,unit_id,item_id,question,choice_text,answer,explanation,sort_order,pack_no,quiz_items(stem,pack_no,item_type,sort_order)";
+const Q_SELECT_FLAT = "id,unit_id,item_id,question,choice_text,answer,explanation,sort_order,pack_no";
+
+function quizItemsEmbedError(qRes) {
+  return (
+    qRes.error &&
+    (qRes.error.code === "PGRST200" ||
+      /quiz_items/i.test(String(qRes.error.message || "")) ||
+      /quiz_items/i.test(String(qRes.error.details || "")))
+  );
+}
+
+/**
+ * 선택 단원(및 필요 시 부모 대단원)에 붙은 문항만 조회
+ * @param {any} client
+ * @param {string[]} unitIds
+ */
+async function fetchQuestionRowsForUnitIds(client, unitIds) {
+  const ids = (unitIds || []).map((x) => String(x).trim()).filter(Boolean);
+  if (!ids.length) return [];
+
+  let qRes = await client
+    .from("quiz_questions")
+    .select(Q_SELECT_WITH_ITEMS)
+    .in("unit_id", ids)
+    .order("sort_order")
+    .limit(20000);
+
+  if (quizItemsEmbedError(qRes)) {
+    console.warn(
+      "OX: quiz_questions↔quiz_items 관계가 스키마에 없어 임베드 없이 다시 불러옵니다. 지문 공유(stem)는 quiz_items·FK 적용 후 사용하세요.",
+      qRes.error,
+    );
+    qRes = await client
+      .from("quiz_questions")
+      .select(Q_SELECT_FLAT)
+      .in("unit_id", ids)
+      .order("sort_order")
+      .limit(20000);
+  }
+
+  if (qRes.error) throw qRes.error;
+  return qRes.data || [];
+}
+
+/**
+ * Supabase 모드에서 리프 단원 문항이 아직이면 네트워크로 채움. data.js(local)는 항상 true.
+ * @returns {Promise<boolean>}
+ */
+async function ensureUnitQuestionsLoaded(sub, leafId) {
+  if (curriculumDataSource !== "supabase" || !oxSupabaseLazy?.client) return true;
+  const leaf = findLeafUnit(sub, leafId);
+  if (!leaf) return false;
+  if (leaf.questions !== null && leaf.questions !== undefined) return true;
+
+  const k = uuidMapKey(leafId);
+  const existing = oxUnitQuestionsInflight.get(k);
+  if (existing) return existing;
+
+  const p = (async () => {
+    try {
+      const client = oxSupabaseLazy.client;
+      const major = majorUnitForLeaf(sub, leafId);
+      const unitIds = major?.id ? [leafId, major.id] : [leafId];
+      const rows = await fetchQuestionRowsForUnitIds(client, unitIds);
+      const sorted = rows.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      if (subjectHasTieredUnits(sub) && major) {
+        leaf.questions = sorted
+          .filter((qq) => eqUuid(qq.unit_id, leafId) || eqUuid(qq.unit_id, major.id))
+          .map(mapQuestionRowFromDb);
+      } else {
+        leaf.questions = sorted.filter((qq) => eqUuid(qq.unit_id, leafId)).map(mapQuestionRowFromDb);
+      }
+      return true;
+    } catch (e) {
+      console.warn("OX: 단원 문항 지연 로드 실패", e);
+      return false;
+    }
+  })();
+
+  oxUnitQuestionsInflight.set(k, p);
+  try {
+    return await p;
+  } finally {
+    oxUnitQuestionsInflight.delete(k);
+  }
+}
+
 async function loadCurriculumFromSupabase(env) {
   const url = supabaseUrlFromEnv(env);
   const key = (env.SUPABASE_ANON_KEY || "").trim();
@@ -322,50 +441,23 @@ async function loadCurriculumFromSupabase(env) {
     global: { headers: { apikey: key, Authorization: `Bearer ${key}` } },
   });
 
-  const qSelectWithItems =
-    "id,unit_id,item_id,question,choice_text,answer,explanation,sort_order,pack_no,quiz_items(stem,pack_no,item_type,sort_order)";
-  const qSelectFlat =
-    "id,unit_id,item_id,question,choice_text,answer,explanation,sort_order,pack_no";
-
-  const [subRes, unitRes, qResFirst] = await Promise.all([
+  const [subRes, unitRes, cfgRes] = await Promise.all([
     client.from("quiz_subjects").select("id,name,sort_order").order("sort_order"),
     client.from("quiz_units").select("id,subject_id,parent_unit_id,name,sort_order").order("sort_order"),
-    client
-      .from("quiz_questions")
-      .select(qSelectWithItems)
-      .order("sort_order")
-      // PostgREST 기본 max-rows(예: 1000) 넘으면 뒤쪽 문항이 잘려 단원에 문제가 없는 것처럼 보일 수 있음
-      .limit(20000),
+    client.from("quiz_settings").select("value").eq("key", "excluded_pack_nos").maybeSingle(),
   ]);
-
-  let qRes = qResFirst;
-  const noQuizItemsEmbed =
-    qRes.error &&
-    (qRes.error.code === "PGRST200" ||
-      /quiz_items/i.test(String(qRes.error.message || "")) ||
-      /quiz_items/i.test(String(qRes.error.details || "")));
-
-  if (noQuizItemsEmbed) {
-    console.warn(
-      "OX: quiz_questions↔quiz_items 관계가 스키마에 없어 임베드 없이 다시 불러옵니다. 지문 공유(stem)는 quiz_items·FK 적용 후 사용하세요.",
-      qRes.error,
-    );
-    qRes = await client.from("quiz_questions").select(qSelectFlat).order("sort_order").limit(20000);
-  }
 
   if (subRes.error) throw subRes.error;
   if (unitRes.error) throw unitRes.error;
-  if (qRes.error) throw qRes.error;
 
-  const cur = buildCurriculumFromRows(subRes.data, unitRes.data, qRes.data);
-
-  const cfgRes = await client.from("quiz_settings").select("value").eq("key", "excluded_pack_nos").maybeSingle();
   if (!cfgRes.error && cfgRes.data && Array.isArray(cfgRes.data.value) && cfgRes.data.value.length) {
     window.OX_EXCLUDED_PACK_NOS = cfgRes.data.value
       .map((n) => Number(n))
       .filter((n) => Number.isFinite(n));
   }
 
+  const cur = buildCurriculumFromRows(subRes.data, unitRes.data, null);
+  oxSupabaseLazy = cur.length ? { client } : null;
   return cur;
 }
 
@@ -663,13 +755,17 @@ function shuffleCopy(arr) {
   return a;
 }
 
-function start() {
+async function start() {
   wrongReviewMode = false;
   const sid = ui.subjectSelect.value;
   const uid = ui.unitSelect.value;
   const sub = curriculum.find((s) => eqUuid(s.id, sid));
+  if (!(await ensureUnitQuestionsLoaded(sub, uid))) {
+    window.alert("문항을 불러오지 못했습니다. 네트워크를 확인한 뒤 다시 시도해 주세요.");
+    return;
+  }
   const unit = findLeafUnit(sub, uid);
-  const all = unit?.questions || [];
+  const all = unit?.questions ?? [];
   const excluded = new Set((window.OX_EXCLUDED_PACK_NOS || []).map(Number));
   const list = all.filter(
     (q) =>
@@ -714,12 +810,16 @@ function start() {
   renderQuestion();
 }
 
-function startWrongReview() {
+async function startWrongReview() {
   const sid = ui.subjectSelect.value;
   const uid = ui.unitSelect.value;
   const sub = curriculum.find((s) => eqUuid(s.id, sid));
+  if (!(await ensureUnitQuestionsLoaded(sub, uid))) {
+    window.alert("문항을 불러오지 못했습니다. 네트워크를 확인한 뒤 다시 시도해 주세요.");
+    return;
+  }
   const unit = findLeafUnit(sub, uid);
-  const all = unit?.questions || [];
+  const all = unit?.questions ?? [];
   const excluded = new Set((window.OX_EXCLUDED_PACK_NOS || []).map(Number));
   const wrongKeys = getWrongKeysForUnit(uid);
   const list = all.filter((q) => {
@@ -748,15 +848,15 @@ function startWrongReview() {
   renderQuestion();
 }
 
-function retry() {
+async function retry() {
   idx = 0;
   score = 0;
   quizSession = [];
   ui.resultCard.classList.add("hidden");
   if (wrongReviewMode) {
-    startWrongReview();
+    await startWrongReview();
   } else {
-    start();
+    await start();
   }
 }
 
@@ -811,6 +911,7 @@ function renderDataSourceNote() {
 
 async function boot() {
   bind();
+  oxSupabaseLazy = null;
 
   curriculumDataSource = "local_js";
   const fallback = window.OX_CURRICULUM || [];
