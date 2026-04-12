@@ -92,8 +92,9 @@ Cursor에 **Supabase MCP**가 연결되어 있으면, 채팅 중 에이전트가
 7. **`POST /api/admin/questions` 가 503일 때**  
    서버는 다음이 없으면 503과 JSON `error` 메시지를 돌려줍니다.
    - `OX_ADMIN_SECRET` 미설정 → `"OX_ADMIN_SECRET is not set on the server"`
-   - `SUPABASE_SERVICE_ROLE_KEY` 또는 URL(`SUPABASE_URL` / `SUPABASE_PROJECT_ID`) 미설정 → `"SUPABASE_URL (or PROJECT_ID) and SUPABASE_SERVICE_ROLE_KEY must be set"`  
-   Vercel **Production** 환경변수에 위 값을 넣은 뒤 **재배포**해야 합니다(저장만 하면 서버리스에 안 들어갈 수 있음).
+   - Supabase URL/ref 미설정 → `SUPABASE_URL` 또는 `SUPABASE_PROJECT_ID` (또는 이미 쓰는 **`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PROJECT_ID`** 도 `/api/env`와 같이 관리 API에서 읽습니다.)
+   - **`SUPABASE_SERVICE_ROLE_KEY`** 미설정 — 이름은 이것만 인식합니다. anon 키와는 별개이며, Supabase **Settings → API**의 **service_role** 값을 넣어야 합니다.  
+   Vercel **Production**에 넣은 뒤 **재배포**해야 서버리스에 반영됩니다.
 
 ## 3. 동작 방식
 

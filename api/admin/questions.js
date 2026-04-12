@@ -4,12 +4,33 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
+/** /api/env.js 와 동일한 키 후보 — Vercel에 NEXT_PUBLIC_* 만 넣은 경우에도 서버에서 URL·ref 를 찾습니다. */
+function normalizeEnv(value) {
+  let s = (value ?? "").toString().trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
+function readFirstEnv(keys) {
+  for (const k of keys) {
+    const v = process.env[k];
+    if (typeof v === "string" && v.trim() !== "") return normalizeEnv(v);
+  }
+  return "";
+}
+
 function supabaseUrl() {
-  const u = (process.env.SUPABASE_URL || "").trim();
-  if (u) return u;
-  const id = (process.env.SUPABASE_PROJECT_ID || "").trim();
+  const direct = readFirstEnv(["SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL", "VITE_SUPABASE_URL"]);
+  if (direct) return direct;
+  const id = readFirstEnv(["SUPABASE_PROJECT_ID", "NEXT_PUBLIC_SUPABASE_PROJECT_ID", "VITE_SUPABASE_PROJECT_ID"]);
   if (id) return `https://${id}.supabase.co`;
   return "";
+}
+
+function serviceRoleKey() {
+  return readFirstEnv(["SUPABASE_SERVICE_ROLE_KEY"]);
 }
 
 function json(res, code, obj) {
@@ -68,10 +89,19 @@ export default async function handler(req, res) {
     return;
   }
 
-  const key = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  const key = serviceRoleKey();
   const url = supabaseUrl();
   if (!url || !key) {
-    json(res, 503, { ok: false, error: "SUPABASE_URL (or PROJECT_ID) and SUPABASE_SERVICE_ROLE_KEY must be set" });
+    const missing = [];
+    if (!url) {
+      missing.push(
+        "Supabase URL or project ref (set SUPABASE_URL or SUPABASE_PROJECT_ID, or NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PROJECT_ID)"
+      );
+    }
+    if (!key) {
+      missing.push("SUPABASE_SERVICE_ROLE_KEY (Supabase Dashboard → Settings → API → service_role secret)");
+    }
+    json(res, 503, { ok: false, error: missing.join(" | ") });
     return;
   }
 
