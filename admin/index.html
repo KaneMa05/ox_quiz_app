@@ -154,55 +154,99 @@
       .dbPreview.empty {
         color: #6b7c8f;
       }
+      .admin-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        box-sizing: border-box;
+      }
+      .admin-modal.hidden {
+        display: none;
+      }
+      .admin-modal__backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+      }
+      .admin-modal__panel {
+        position: relative;
+        width: 100%;
+        max-width: 26rem;
+        max-height: min(85vh, 32rem);
+        display: flex;
+        flex-direction: column;
+        border-radius: 10px;
+        border: 1px solid #2a3542;
+        background: #151c24;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+      }
+      .admin-modal__title {
+        margin: 0;
+        padding: 1rem 1rem 0.5rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #e7ecf3;
+      }
+      .admin-modal__body {
+        margin: 0;
+        padding: 0 1rem;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        color: #c8d4e0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow: auto;
+        flex: 1;
+        min-height: 0;
+      }
+      .admin-modal__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-top: 1px solid #2a3542;
+      }
+      .admin-modal__actions button {
+        margin-top: 0;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   </head>
   <body>
     <h1>문제 입력 · 삭제</h1>
-    <p class="muted">Supabase에 연결된 단원에 선지(OX) 한 행을 추가하거나 삭제합니다. 삭제는 복구되지 않습니다.</p>
 
-    <label for="adminSecret">관리 비밀번호 (Vercel의 OX_ADMIN_SECRET)</label>
-    <input id="adminSecret" type="password" autocomplete="off" placeholder="저장: 브라우저 세션 동안만" />
+    <label for="adminSecret">관리 비밀번호</label>
+    <input id="adminSecret" type="password" autocomplete="off" placeholder="OX_ADMIN_SECRET" />
 
     <label for="unitSelect">단원</label>
     <select id="unitSelect"></select>
 
-    <label for="packNo">pack_no (선택, 숫자만 · 원본 4선지·수동 추가 공통)</label>
+    <label for="packNo">pack_no (선택)</label>
     <input id="packNo" type="number" />
 
     <hr />
 
-    <h2 style="font-size:1rem;margin-bottom:0">원본 붙여넣기 (4지선다 → DB 4행)</h2>
-    <p class="muted">
-      지문 다음 줄부터 ①②③④ 선지, 그 다음 <code>해설 답 ④</code> 형태의 정답 표기, 이어서 해설 본문을 붙여넣으면 한 번에 4개의
-      <code>quiz_questions</code> 행이 들어갑니다.       해설 본문에 줄 시작 <code>①</code>~<code>④</code>가 네 줄 연속이면 선지별로 나누고, 번호가 한 번만 나오면(예:
-      <code>해설 답 ②</code> 아래에 <code>② …</code> 한 블록만) 그 선지 행에만 <code>explanation</code>을 넣고 나머지
-      세 행은 null 입니다. 저장 시 줄 앞 ①~④는 제거합니다. 문제 가공은 미리보기만, DB에 4선지 추가로 저장합니다. (지문에
-      「가장 옳지 않은」류면 정답 번호는 X. <code>pack_no</code>는 네 행 공통.)
-    </p>
+    <h2 style="font-size:1rem;margin-bottom:0">4지선다 → DB 4행</h2>
     <label for="rawBlock">문제 원본</label>
     <textarea id="rawBlock" rows="14" placeholder="지문…&#10;① …&#10;② …&#10;③ …&#10;④ …&#10;&#10;해설 답 ④&#10;해설 본문…"></textarea>
     <div class="btnRow">
-      <button type="button" class="secondary" id="btnProcessRaw" title="Supabase에는 쓰지 않고, 아래 미리보기만 갱신합니다.">
-        문제 가공 (미리보기)
-      </button>
-      <button type="button" id="btnAddFromRaw" title="선택한 단원에 quiz_questions 행 4개를 INSERT 합니다.">
-        DB에 4선지 추가
-      </button>
+      <button type="button" class="secondary" id="btnProcessRaw">미리보기</button>
+      <button type="button" id="btnAddFromRaw">DB에 4선지 추가</button>
     </div>
-    <p class="muted" style="margin-top: 0.35rem">
-      파란 버튼만 서버로 전송되어 DB에 반영됩니다. 회색 버튼은 JSON 미리보기용입니다.
-    </p>
 
     <div id="msg" role="status" aria-live="polite"></div>
     <div id="msgActions" class="hidden" aria-live="polite"></div>
 
-    <label>DB 양식 미리보기 (<code>quiz_questions</code>에 넣을 값 4행)</label>
-    <pre id="dbPreview" class="dbPreview empty" role="region" aria-label="DB 양식 미리보기">가공 또는 DB 추가 직전에 여기에 JSON으로 표시됩니다.</pre>
+    <label>미리보기 (4행 JSON)</label>
+    <pre id="dbPreview" class="dbPreview empty" role="region" aria-label="미리보기">미리보기 JSON</pre>
 
     <hr />
 
-    <h2 style="font-size:1rem;margin-bottom:0">추가 (수동)</h2>
+    <h2 style="font-size:1rem;margin-bottom:0">수동 추가</h2>
 
     <label for="question">지문 (question)</label>
     <textarea id="question" placeholder="지문 전체"></textarea>
@@ -226,21 +270,81 @@
     <hr />
 
     <h2 style="font-size:1rem;margin-bottom:0">삭제</h2>
-    <p class="muted">단원을 고른 뒤 목록을 불러와 행을 삭제합니다.</p>
     <button type="button" class="secondary" id="btnLoad">이 단원 문항 불러오기</button>
     <div id="listWrap"></div>
 
-    <p class="muted">
-      로컬: <code>vercel dev</code> 후 이 페이지를 열고, Vercel 환경변수에 <code>OX_ADMIN_SECRET</code> ·
-      <code>SUPABASE_SERVICE_ROLE_KEY</code> · <code>SUPABASE_URL</code>(또는 PROJECT_ID)를 설정하세요.
-    </p>
+    <div id="adminModal" class="admin-modal hidden" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+      <div class="admin-modal__backdrop" aria-hidden="true"></div>
+      <div class="admin-modal__panel">
+        <h3 id="adminModalTitle" class="admin-modal__title"></h3>
+        <pre id="adminModalBody" class="admin-modal__body"></pre>
+        <div id="adminModalActions" class="admin-modal__actions"></div>
+      </div>
+    </div>
 
     <script>
       const msg = document.getElementById("msg");
       const msgActions = document.getElementById("msgActions");
       const unitSelect = document.getElementById("unitSelect");
       const listWrap = document.getElementById("listWrap");
+      const adminModal = document.getElementById("adminModal");
+      const adminModalTitle = document.getElementById("adminModalTitle");
+      const adminModalBody = document.getElementById("adminModalBody");
+      const adminModalActions = document.getElementById("adminModalActions");
       const UNIT_STORE_KEY = "ox_admin_unit_id_v1";
+
+      function closeAdminModal() {
+        if (adminModalEscapeHandler) {
+          document.removeEventListener("keydown", adminModalEscapeHandler);
+          adminModalEscapeHandler = null;
+        }
+        adminModal.classList.add("hidden");
+        adminModalActions.innerHTML = "";
+      }
+
+      let adminModalEscapeHandler = null;
+
+      function openAdminModal(opts) {
+        if (adminModalEscapeHandler) {
+          document.removeEventListener("keydown", adminModalEscapeHandler);
+          adminModalEscapeHandler = null;
+        }
+        adminModalTitle.textContent = opts.title || "";
+        adminModalBody.textContent = opts.body || "";
+        adminModalActions.innerHTML = "";
+        const actions = opts.actions || [];
+        for (const a of actions) {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.textContent = a.text;
+          if (a.secondary) b.className = "secondary";
+          b.addEventListener("click", (ev) => {
+            ev.preventDefault();
+            a.onclick();
+          });
+          adminModalActions.appendChild(b);
+        }
+        adminModal.classList.remove("hidden");
+        const first = adminModalActions.querySelector("button");
+        if (first) first.focus();
+        if (actions.length === 1 && actions[0].text === "확인") {
+          adminModalEscapeHandler = (ev) => {
+            if (ev.key === "Escape") {
+              ev.preventDefault();
+              closeAdminModal();
+            }
+          };
+          document.addEventListener("keydown", adminModalEscapeHandler);
+        }
+      }
+
+      function showAdminAlert(title, body) {
+        openAdminModal({
+          title: title || "알림",
+          body: body || "",
+          actions: [{ text: "확인", secondary: true, onclick: () => closeAdminModal() }],
+        });
+      }
 
       function rememberUnitSelection() {
         const v = unitSelect.value;
@@ -276,58 +380,45 @@
       }
 
       /**
-       * DB 추가 완료 후: 다음 문제 입력을 위해 입력란 비우기 또는 전체 새로고침(단원은 sessionStorage 유지).
+       * DB 추가 완료 후 팝업: 입력란 비우기 또는 새로고침(단원은 sessionStorage 유지).
        * @param {"rawFour"|"manual"} kind
        */
       function showPostInsertDone(detailText, kind) {
         clearMsgActions();
+        setMsg("", "");
         const hint =
           kind === "rawFour"
-            ? "다음 문제를 넣으려면「입력란 비우기」로 원본·미리보기를 지우거나,「페이지 새로고침」으로 화면을 다시 불러오세요."
-            : "다음 문제를 넣으려면「입력란 비우기」로 지문·선지란을 비우거나,「페이지 새로고침」을 누르세요.";
-        msg.textContent =
-          "완료되었습니다.\n" + hint + "\n(단원 선택은 그대로 유지됩니다.)" + (detailText ? "\n\n" + detailText : "");
-        msg.className = "ok";
+            ? "다음 문제: 「입력란 비우기」 또는 「페이지 새로고침」.\n단원 선택은 유지됩니다."
+            : "다음 문제: 「입력란 비우기」 또는 「페이지 새로고침」.\n단원 선택은 유지됩니다.";
+        const body = hint + (detailText ? "\n\n" + detailText : "");
 
-        const row = document.createElement("div");
-        row.className = "btnRow";
+        const doClear =
+          kind === "rawFour"
+            ? () => {
+                document.getElementById("rawBlock").value = "";
+                clearDbPreview();
+                closeAdminModal();
+                setMsg("입력란을 비웠습니다.", "ok");
+                document.getElementById("rawBlock").focus();
+              }
+            : () => {
+                document.getElementById("question").value = "";
+                document.getElementById("choice").value = "";
+                document.getElementById("explanation").value = "";
+                document.getElementById("sortOrder").value = "";
+                closeAdminModal();
+                setMsg("입력란을 비웠습니다.", "ok");
+                document.getElementById("question").focus();
+              };
 
-        const btnClear = document.createElement("button");
-        btnClear.type = "button";
-        btnClear.className = "secondary";
-        btnClear.textContent = "입력란 비우기";
-        if (kind === "rawFour") {
-          btnClear.onclick = () => {
-            document.getElementById("rawBlock").value = "";
-            clearDbPreview();
-            clearMsgActions();
-            setMsg("입력란을 비웠습니다. 다음 문제 원본을 붙여넣을 수 있습니다.", "ok");
-            focusMsg();
-            document.getElementById("rawBlock").focus();
-          };
-        } else {
-          btnClear.onclick = () => {
-            document.getElementById("question").value = "";
-            document.getElementById("choice").value = "";
-            document.getElementById("explanation").value = "";
-            document.getElementById("sortOrder").value = "";
-            clearMsgActions();
-            setMsg("입력란을 비웠습니다. 다음 문제를 입력할 수 있습니다.", "ok");
-            focusMsg();
-            document.getElementById("question").focus();
-          };
-        }
-        row.appendChild(btnClear);
-
-        const btnReload = document.createElement("button");
-        btnReload.type = "button";
-        btnReload.textContent = "페이지 새로고침";
-        btnReload.addEventListener("click", () => location.reload());
-        row.appendChild(btnReload);
-
-        msgActions.appendChild(row);
-        msgActions.classList.remove("hidden");
-        focusMsg();
+        openAdminModal({
+          title: "완료되었습니다",
+          body,
+          actions: [
+            { text: "입력란 비우기", secondary: true, onclick: doClear },
+            { text: "페이지 새로고침", secondary: false, onclick: () => location.reload() },
+          ],
+        });
       }
 
       function getSecret() {
@@ -538,7 +629,7 @@
 
       function clearDbPreview() {
         const pre = document.getElementById("dbPreview");
-        pre.textContent = "가공 또는 DB 추가 직전에 여기에 JSON으로 표시됩니다.";
+        pre.textContent = "미리보기 JSON";
         pre.classList.add("empty");
       }
 
@@ -651,8 +742,7 @@
         setMsg("");
         const unit_id = unitSelect.value;
         if (!unit_id) {
-          setMsg("단원을 선택하세요.", "err");
-          focusMsg();
+          showAdminAlert("알림", "단원을 선택하세요.");
           return;
         }
         const raw = document.getElementById("rawBlock").value;
@@ -662,66 +752,86 @@
           parsed = parseRawFourChoiceBlock(raw);
         } catch (e) {
           clearDbPreview();
-          setMsg(String(e.message || e), "err");
-          focusMsg();
+          showAdminAlert("가공 오류", String(e.message || e));
           return;
         }
         const packNum = packRaw === "" ? null : Number(packRaw);
         const pack_no = Number.isFinite(packNum) ? packNum : null;
         setDbPreviewFromParsed(parsed, unit_id, pack_no);
         const { rows } = buildFourQuestionRows(parsed, unit_id, pack_no);
-        const summaryLines = [];
-        btnAddFromRaw.disabled = true;
-        try {
-          setMsg(
-            "Supabase에 4개의 선지 행을 저장합니다.\n서버로 전송 중입니다. 잠시만 기다려 주세요…",
-            "pending"
-          );
-          focusMsg();
-          for (let i = 0; i < 4; i++) {
+
+        const runInsert = async () => {
+          const summaryLines = [];
+          btnAddFromRaw.disabled = true;
+          try {
             setMsg(
-              "저장 중… (" +
-                (i + 1) +
-                "/4)\n선지 " +
-                CIRC[i] +
-                " 행을 서버로 보내는 중입니다.",
+              "Supabase에 4개의 선지 행을 저장합니다.\n서버로 전송 중입니다. 잠시만 기다려 주세요…",
               "pending"
             );
-            const row = rows[i];
-            const answer = row.answer;
-            summaryLines.push(CIRC[i] + " → " + (answer ? "O" : "X") + " · " + row.choice_text.slice(0, 44) + (row.choice_text.length > 44 ? "…" : ""));
-            await apiAdmin({
-              action: "insert",
-              unit_id,
-              question: row.question,
-              choice_text: row.choice_text,
-              answer: row.answer,
-              explanation: row.explanation,
-              pack_no: row.pack_no,
-            });
+            focusMsg();
+            for (let i = 0; i < 4; i++) {
+              setMsg(
+                "저장 중… (" +
+                  (i + 1) +
+                  "/4)\n선지 " +
+                  CIRC[i] +
+                  " 행을 서버로 보내는 중입니다.",
+                "pending"
+              );
+              const row = rows[i];
+              const answer = row.answer;
+              summaryLines.push(CIRC[i] + " → " + (answer ? "O" : "X") + " · " + row.choice_text.slice(0, 44) + (row.choice_text.length > 44 ? "…" : ""));
+              await apiAdmin({
+                action: "insert",
+                unit_id,
+                question: row.question,
+                choice_text: row.choice_text,
+                answer: row.answer,
+                explanation: row.explanation,
+                pack_no: row.pack_no,
+              });
+            }
+            rememberUnitSelection();
+            showPostInsertDone(
+              "Supabase에 4행 추가됨 (" +
+                (parsed.isNegative ? "「옳지 않은」형: 정답 번호는 X" : "「옳은」형: 정답 번호는 O") +
+                " · 해설 답 " +
+                CIRC[parsed.correctIndex] +
+                ")\n" +
+                summaryLines.join("\n"),
+              "rawFour"
+            );
+          } catch (e) {
+            showAdminAlert("저장 실패", String(e.message || e));
+          } finally {
+            btnAddFromRaw.disabled = false;
           }
-          rememberUnitSelection();
-          showPostInsertDone(
-            "Supabase에 4행 추가됨 (" +
-              (parsed.isNegative ? "「옳지 않은」형: 정답 번호는 X" : "「옳은」형: 정답 번호는 O") +
-              " · 해설 답 " +
-              CIRC[parsed.correctIndex] +
-              ")\n" +
-              summaryLines.join("\n"),
-            "rawFour"
-          );
-        } catch (e) {
-          setMsg("저장에 실패했습니다.\n\n" + String(e.message || e), "err");
-          focusMsg();
-        } finally {
-          btnAddFromRaw.disabled = false;
-        }
+        };
+
+        openAdminModal({
+          title: "DB에 추가",
+          body: "선택한 단원에 선지 4행을 추가합니다. 진행할까요?",
+          actions: [
+            { text: "취소", secondary: true, onclick: () => closeAdminModal() },
+            {
+              text: "추가",
+              secondary: false,
+              onclick: () => {
+                closeAdminModal();
+                void runInsert();
+              },
+            },
+          ],
+        });
       };
 
       document.getElementById("btnAdd").onclick = async () => {
         setMsg("");
         const unit_id = unitSelect.value;
-        if (!unit_id) return setMsg("단원을 선택하세요.", "err");
+        if (!unit_id) {
+          showAdminAlert("알림", "단원을 선택하세요.");
+          return;
+        }
         const question = document.getElementById("question").value.trim();
         const choice_text = document.getElementById("choice").value.trim();
         const explanation = stripCircledFromExplanationLines(document.getElementById("explanation").value.trim());
@@ -743,7 +853,7 @@
           rememberUnitSelection();
           showPostInsertDone("추가된 id: " + (j.id || ""), "manual");
         } catch (e) {
-          setMsg(String(e.message || e), "err");
+          showAdminAlert("저장 실패", String(e.message || e));
         }
       };
 
@@ -751,7 +861,10 @@
         setMsg("");
         listWrap.innerHTML = "";
         const unit_id = unitSelect.value;
-        if (!unit_id) return setMsg("단원을 선택하세요.", "err");
+        if (!unit_id) {
+          showAdminAlert("알림", "단원을 선택하세요.");
+          return;
+        }
         let env = null;
         try {
           env = await loadEnv();
@@ -805,7 +918,7 @@
                 tr.remove();
                 setMsg("삭제됨.", "ok");
               } catch (e) {
-                setMsg(String(e.message || e), "err");
+                showAdminAlert("삭제 실패", String(e.message || e));
               }
             };
             td5.appendChild(btn);
@@ -815,7 +928,7 @@
           t.appendChild(tb);
           listWrap.appendChild(t);
         } catch (e) {
-          setMsg(msgWithSupabaseKeyHint(e, env), "err");
+          showAdminAlert("불러오기 실패", msgWithSupabaseKeyHint(e, env));
         }
       };
 
@@ -825,9 +938,9 @@
           env = await loadEnv();
           const client = supabaseFromEnv(env);
           await fillUnits(client);
-          setMsg("단원 목록을 불러왔습니다. 관리 비밀번호 입력 후 추가·삭제하세요.", "ok");
+          setMsg("단원 목록을 불러왔습니다.", "ok");
         } catch (e) {
-          setMsg(msgWithSupabaseKeyHint(e, env), "err");
+          showAdminAlert("연결 실패", msgWithSupabaseKeyHint(e, env));
         }
       })();
     </script>
