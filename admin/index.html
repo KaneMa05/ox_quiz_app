@@ -510,19 +510,22 @@
         return hits;
       }
 
-      function findOrderedFourSeqStart(hits) {
-        for (let s = 0; s <= hits.length - 4; s++) {
-          if (hits[s].idx !== 0) continue;
-          let ok = true;
-          for (let k = 1; k < 4; k++) {
-            if (hits[s + k].idx !== k) {
-              ok = false;
-              break;
+      /** 문서 순서로 ①→②→③→④ 마커를 찾음(중간에 잘못 잡힌 ① 등이 끼어도 동작). */
+      function findOrderedFourExplanationMarkers(hits) {
+        const ordered = hits.slice().sort((a, b) => a.blockStart - b.blockStart);
+        for (let s = 0; s < ordered.length; s++) {
+          if (ordered[s].idx !== 0) continue;
+          const picked = [ordered[s]];
+          let need = 1;
+          for (let j = s + 1; j < ordered.length && need < 4; j++) {
+            if (ordered[j].idx === need) {
+              picked.push(ordered[j]);
+              need++;
             }
           }
-          if (ok) return s;
+          if (picked.length === 4) return picked;
         }
-        return -1;
+        return null;
       }
 
       /**
@@ -534,10 +537,9 @@
         if (!full) return { mode: "none", perRow: null, preamble: "", explanationWasSplit: false };
 
         const hits = findExplanationCircledHits(full);
-        const seqStart = findOrderedFourSeqStart(hits);
+        const h = findOrderedFourExplanationMarkers(hits);
 
-        if (seqStart >= 0) {
-          const h = hits.slice(seqStart, seqStart + 4);
+        if (h) {
           const preamble = full.slice(0, h[0].blockStart).trim();
           const rawBodies = [];
           for (let i = 0; i < 4; i++) {
@@ -579,7 +581,7 @@
         for (let i = 0; i < 4; i++) {
           let explanation = null;
           if (split.mode === "multi" && split.perRow) {
-            explanation = split.perRow[i] ?? (split.preamble ? split.preamble : null) ?? fallback;
+            explanation = split.perRow[i] != null && split.perRow[i] !== "" ? split.perRow[i] : null;
           } else if (split.mode === "single" && split.perRow) {
             explanation = split.perRow[i] ?? null;
           } else {
