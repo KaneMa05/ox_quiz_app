@@ -163,10 +163,10 @@
     <h2 style="font-size:1rem;margin-bottom:0">원본 붙여넣기 (4지선다 → DB 4행)</h2>
     <p class="muted">
       지문 다음 줄부터 ①②③④ 선지, 그 다음 <code>해설 답 ④</code> 형태의 정답 표기, 이어서 해설 본문을 붙여넣으면 한 번에 4개의
-      <code>quiz_questions</code> 행이 들어갑니다. 해설 안에 다시 줄 시작 <code>①</code>~<code>④</code>가 순서대로 있으면,
-      그 구간을 선지별로 나누어 각 행 <code>explanation</code>에 넣고, 저장 시 줄 앞 번호(①~④)는 제거합니다(앞 문단은 네 행
-      공통). 문제 가공은 미리보기만 갱신합니다. DB에 4선지 추가를 눌러야 Supabase에 실제로 네 행이 들어갑니다. (지문에 「가장 옳지 않은」류가 있으면 정답 번호 선지는 X, 나머지는 O. <code>pack_no</code>는 네 행
-      공통.)
+      <code>quiz_questions</code> 행이 들어갑니다.       해설 본문에 줄 시작 <code>①</code>~<code>④</code>가 네 줄 연속이면 선지별로 나누고, 번호가 한 번만 나오면(예:
+      <code>해설 답 ②</code> 아래에 <code>② …</code> 한 블록만) 그 선지 행에만 <code>explanation</code>을 넣고 나머지
+      세 행은 null 입니다. 저장 시 줄 앞 ①~④는 제거합니다. 문제 가공은 미리보기만, DB에 4선지 추가로 저장합니다. (지문에
+      「가장 옳지 않은」류면 정답 번호는 X. <code>pack_no</code>는 네 행 공통.)
     </p>
     <label for="rawBlock">문제 원본</label>
     <textarea id="rawBlock" rows="14" placeholder="지문…&#10;① …&#10;② …&#10;③ …&#10;④ …&#10;&#10;해설 답 ④&#10;해설 본문…"></textarea>
@@ -309,14 +309,7 @@
         return isNegative ? rowIndex !== correctIndex : rowIndex === correctIndex;
       }
 
-      /**
-       * 해설 본문에서 줄 시작 ①②③④ … 순서 블록을 찾아 선지별로 나눈다.
-       * @returns {{ usePerChoice: boolean, perRow: (string|null)[]|null }}
-       */
-      function splitExplanationPerChoice(fullExplanation) {
-        const full = String(fullExplanation || "").replace(/\r\n/g, "\n").trim();
-        if (!full) return { usePerChoice: false, perRow: null, preamble: "" };
-
+      function findExplanationCircledHits(full) {
         const re = /(?:^|\n)\s*([①②③④])\s*/g;
         const hits = [];
         let m;
@@ -325,8 +318,10 @@
           if (idx < 0) continue;
           hits.push({ idx, blockStart: m.index, afterMarker: m.index + m[0].length });
         }
+        return hits;
+      }
 
-        let seqStart = -1;
+      function findOrderedFourSeqStart(hits) {
         for (let s = 0; s <= hits.length - 4; s++) {
           if (hits[s].idx !== 0) continue;
           let ok = true;
@@ -336,43 +331,71 @@
               break;
             }
           }
-          if (ok) {
-            seqStart = s;
-            break;
+          if (ok) return s;
+        }
+        return -1;
+      }
+
+      /**
+       * 해설 본문: ①②③④ 네 줄 연속이면 선지별 분리, 줄 시작 번호가 한 번뿐이면 해당 선지만, 아니면 전체를 네 행에 동일.
+       * @returns {{ mode: string, perRow: (string|null)[]|null, preamble: string, explanationWasSplit: boolean }}
+       */
+      function resolveExplanationPerRows(fullExplanation) {
+        const full = String(fullExplanation || "").replace(/\r\n/g, "\n").trim();
+        if (!full) return { mode: "none", perRow: null, preamble: "", explanationWasSplit: false };
+
+        const hits = findExplanationCircledHits(full);
+        const seqStart = findOrderedFourSeqStart(hits);
+
+        if (seqStart >= 0) {
+          const h = hits.slice(seqStart, seqStart + 4);
+          const preamble = full.slice(0, h[0].blockStart).trim();
+          const rawBodies = [];
+          for (let i = 0; i < 4; i++) {
+            const from = h[i].afterMarker;
+            const to = i < 3 ? h[i + 1].blockStart : full.length;
+            rawBodies.push(full.slice(from, to).trim());
           }
+          const perRow = rawBodies.map((body, i) => {
+            const parts = [];
+            if (preamble) parts.push(preamble);
+            if (body) parts.push(body);
+            const out = parts.join("\n\n").trim();
+            return out || null;
+          });
+          return { mode: "multi", perRow, preamble, explanationWasSplit: true };
         }
 
-        if (seqStart < 0) return { usePerChoice: false, perRow: null, preamble: "" };
-
-        const h = hits.slice(seqStart, seqStart + 4);
-        const preamble = full.slice(0, h[0].blockStart).trim();
-        const rawBodies = [];
-        for (let i = 0; i < 4; i++) {
-          const from = h[i].afterMarker;
-          const to = i < 3 ? h[i + 1].blockStart : full.length;
-          rawBodies.push(full.slice(from, to).trim());
-        }
-
-        const perRow = rawBodies.map((body, i) => {
+        if (hits.length === 1) {
+          const h0 = hits[0];
+          const preamble = full.slice(0, h0.blockStart).trim();
+          const after = full.slice(h0.afterMarker).trim();
           const parts = [];
           if (preamble) parts.push(preamble);
-          if (body) parts.push(body);
-          const out = parts.join("\n\n").trim();
-          return out || null;
-        });
-        return { usePerChoice: true, perRow, preamble };
+          if (after) parts.push(after);
+          const combined = parts.join("\n\n").trim();
+          const perRow = [null, null, null, null];
+          perRow[h0.idx] = combined || null;
+          return { mode: "single", perRow, preamble: preamble || "", explanationWasSplit: true };
+        }
+
+        return { mode: "full", perRow: null, preamble: "", explanationWasSplit: false };
       }
 
       /** @param {{ stem: string, choices: string[], correctIndex: number, explanation: string, isNegative: boolean }} parsed */
       function buildFourQuestionRows(parsed, unit_id, pack_no) {
-        const split = splitExplanationPerChoice(parsed.explanation);
+        const split = resolveExplanationPerRows(parsed.explanation);
         const fallback = parsed.explanation ? parsed.explanation : null;
         const rows = [];
         for (let i = 0; i < 4; i++) {
-          let explanation =
-            split.usePerChoice && split.perRow
-              ? split.perRow[i] ?? (split.preamble ? split.preamble : null) ?? fallback
-              : fallback;
+          let explanation = null;
+          if (split.mode === "multi" && split.perRow) {
+            explanation = split.perRow[i] ?? (split.preamble ? split.preamble : null) ?? fallback;
+          } else if (split.mode === "single" && split.perRow) {
+            explanation = split.perRow[i] ?? null;
+          } else {
+            explanation = fallback;
+          }
           explanation = stripCircledFromExplanationLines(explanation);
           rows.push({
             unit_id: unit_id || "",
@@ -384,12 +407,16 @@
             is_active: true,
           });
         }
-        return { rows, explanationWasSplit: !!(split.usePerChoice && split.perRow) };
+        return {
+          rows,
+          explanationWasSplit: split.explanationWasSplit,
+          explanationMode: split.mode,
+        };
       }
 
       function setDbPreviewFromParsed(parsed, unit_id, pack_no) {
         const pre = document.getElementById("dbPreview");
-        const { rows, explanationWasSplit } = buildFourQuestionRows(parsed, unit_id, pack_no);
+        const { rows, explanationWasSplit, explanationMode } = buildFourQuestionRows(parsed, unit_id, pack_no);
         const meta = [];
         meta.push(
           "// " +
@@ -399,8 +426,11 @@
             " · 해설 답 " +
             CIRC[parsed.correctIndex]
         );
-        if (explanationWasSplit) {
-          meta.push("// 해설: 줄 시작 ①②③④ 순서 블록으로 선지별로 나눔 · 저장 시 줄 앞 ①~④는 제거(앞 문단 공통)");
+        if (explanationWasSplit && explanationMode === "multi") {
+          meta.push("// 해설: 줄 시작 ①②③④ 네 줄 연속 → 선지별 분리 · 줄 앞 번호 제거(앞 문단 공통)");
+        }
+        if (explanationWasSplit && explanationMode === "single") {
+          meta.push("// 해설: 줄 시작 번호 한 번만 → 해당 선지 행만 explanation, 나머지 null");
         }
         meta.push("// sort_order 는 API에서 비우면 단원 맨 뒤에 자동 연번");
         if (!unit_id) meta.push("// 단원 미선택: unit_id 가 비어 있습니다. 위에서 단원을 고른 뒤 다시 가공하세요.");
